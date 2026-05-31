@@ -679,8 +679,7 @@ select.fi option{background:var(--s2)}
     <button class="btn-watch" onclick="doTwitchLogin()" style="width:100%;justify-content:center;border-radius:8px">
       <i class="ti ti-brand-twitch"></i>Continuar com Twitch
     </button>
-    <div style="margin:14px 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Demo — escolhe um utilizador</div>
-    <div class="mock-users" id="mock-users"></div>
+
     <button onclick="closeLogin()" style="all:unset;font-size:12px;color:var(--muted);cursor:pointer;margin-top:8px">Cancelar</button>
   </div>
 </div>
@@ -775,6 +774,7 @@ function goPage(id,el){
   document.querySelectorAll('.nl').forEach(b=>b.classList.remove('active'));
   document.getElementById('p-'+id).classList.add('active');
   if(el)el.classList.add('active');
+  sessionStorage.setItem('currentPage', id);
   const map={perfil:loadPerfil,loja:loadLoja,timers:loadTimers,disfarces:loadDisfarces,giveaway:loadGiveaway,admin:loadAdmin};
   if(map[id])map[id]();
 }
@@ -834,19 +834,7 @@ async function doLogout(){
   toast('Sessão terminada.');
 }
 
-// Mock users for demo
-const MOCK=['inuhzao','darknight97','lunastreamer'];
-document.getElementById('mock-users').innerHTML=MOCK.map(u=>`<button class="mock-u" onclick="mockLogin('${u}')">${u}</button>`).join('');
 
-async function mockLogin(u){
-  closeLogin();
-  toast(`Demo: logado como ${u} — use Twitch real em produção`);
-  // In production this goes through real Twitch OAuth
-  // For demo we just show the UI
-  currentUser={id:'demo',username:u,display_name:u,avatar_url:'',is_admin:u==='inuhzao'};
-  updateNav();
-  toast(`Bem-vindo, ${u}!`);
-}
 
 // ── PERFIL ──
 async function loadPerfil(){
@@ -1252,7 +1240,14 @@ async function checkLive(){
 }
 
 // ── INIT ──
-initAuth();
+initAuth().then(() => {
+  // Restaurar última página após F5
+  const saved = sessionStorage.getItem('currentPage');
+  if(saved && saved !== 'home') {
+    const navBtn = document.querySelector(`.nl[onclick*="'${saved}'"]`);
+    goPage(saved, navBtn);
+  }
+});
 checkLive();
 </script>
 </body>
