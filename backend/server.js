@@ -3,15 +3,12 @@ const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const session = require('express-session')
-const ConnectPgSimple = require('connect-pg-simple')
 
 const app = express()
-const PgSession = ConnectPgSimple(session)
 
 // ── MIDDLEWARE ─────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }))
 
-// Lista de origens permitidas
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
@@ -23,7 +20,7 @@ app.use(cors({
     if (!origin) return callback(null, true)
     if (allowedOrigins.includes(origin)) return callback(null, true)
     if (origin.includes('inuhzao') && origin.includes('vercel.app')) return callback(null, true)
-    callback(new Error('CORS: origem nao permitida: ' + origin))
+    callback(new Error('CORS blocked: ' + origin))
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -34,16 +31,11 @@ app.options('*', cors())
 app.use(express.json({ limit: '5mb' }))
 app.use(express.urlencoded({ extended: true }))
 
-// ── SESSÃO ─────────────────────────────────────────
+// ── SESSÃO (memória — simples e fiável) ────────────
 app.set('trust proxy', 1)
 
 app.use(session({
-  store: new PgSession({
-    conString: process.env.DATABASE_URL,
-    tableName: 'session',
-    createTableIfMissing: true
-  }),
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'inuhzao_secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -71,11 +63,9 @@ app.get('/health', (req, res) => {
 app.use((req, res) => res.status(404).json({ error: 'Rota nao encontrada.' }))
 
 app.use((err, req, res, next) => {
-  console.error(err.stack)
+  console.error(err.message)
   res.status(500).json({ error: 'Erro interno.' })
 })
 
 const PORT = process.env.PORT || 3000
-app.listen(PORT, () => {
-  console.log(`INUHZAO Backend porta ${PORT}`)
-})
+app.listen(PORT, () => console.log(`INUHZAO Backend porta ${PORT}`))
