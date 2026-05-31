@@ -89,7 +89,7 @@ router.post('/:id/enter', requireAuth, async (req, res) => {
 // ── POST /giveaway ─────────────────────────────────
 // Admin: criar giveaway
 router.post('/', requireAdmin, async (req, res) => {
-  const { prize, description, cost } = req.body
+  const { prize, description, cost, image_url } = req.body
   if (!prize) return res.status(400).json({ error: 'Prémio obrigatório.' })
 
   // Fechar giveaways activos anteriores
@@ -97,7 +97,7 @@ router.post('/', requireAdmin, async (req, res) => {
 
   const { data, error } = await supabase
     .from('giveaways')
-    .insert({ prize, description, cost: cost || 0, active: true })
+    .insert({ prize, description, cost: cost || 0, active: true, image_url: image_url || null })
     .select()
     .single()
 

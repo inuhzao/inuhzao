@@ -634,20 +634,62 @@ select.fi option{background:var(--s2)}
     </div>
     <!-- GIVEAWAY ADMIN -->
     <div class="as" id="as-giveaway">
+      <!-- CRIAR -->
       <div class="admin-card">
-        <h3>Gestão do giveaway</h3>
+        <h3>Criar giveaway</h3>
+        <div style="margin-bottom:12px">
+          <div class="upload-area" onclick="document.getElementById('gw-img-file').click()" id="gw-img-area">
+            <i class="ti ti-photo" style="font-size:24px;color:var(--muted);margin-bottom:4px;display:block"></i>
+            <div style="font-size:11px;color:var(--muted)">Clica para carregar imagem do prémio (opcional)</div>
+          </div>
+          <input type="file" id="gw-img-file" accept="image/*" style="display:none" onchange="previewGwImg(this)">
+        </div>
         <div class="form-grid">
           <div class="fg"><label class="fl">Prémio</label><input class="fi" type="text" id="agw-p" placeholder="Sub gifted, merch..."></div>
           <div class="fg"><label class="fl">Custo (pts)</label><input class="fi" type="number" id="agw-c" value="500"></div>
-          <div class="fg"><label class="fl">Descrição</label><input class="fi" type="text" id="agw-d" placeholder="Descrição..."></div>
+          <div class="fg" style="grid-column:1/-1"><label class="fl">Descrição</label><input class="fi" type="text" id="agw-d" placeholder="Descrição do prémio..."></div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn-success" onclick="startGiveaway()"><i class="ti ti-player-play"></i>Iniciar</button>
-          <button class="btn-action" onclick="drawGiveaway()"><i class="ti ti-dice"></i>Sortear</button>
-          <button class="btn-danger" onclick="endGiveaway()"><i class="ti ti-player-stop"></i>Terminar</button>
-        </div>
-        <div id="agw-status" style="margin-top:12px;font-size:12px;color:var(--muted)">Nenhum giveaway ativo</div>
+        <button class="btn-success" onclick="startGiveaway()"><i class="ti ti-player-play"></i>Iniciar giveaway</button>
       </div>
+
+      <!-- ESTADO ACTUAL -->
+      <div class="admin-card" id="agw-active-card" style="display:none">
+        <h3>Giveaway ativo</h3>
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px">
+          <div id="agw-thumb" style="width:80px;height:80px;border-radius:8px;background:var(--s2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center">
+            <i class="ti ti-gift" style="font-size:28px;color:var(--muted)"></i>
+          </div>
+          <div style="flex:1">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.06em;margin-bottom:4px" id="agw-prize-display">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px" id="agw-desc-display"></div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--orange);line-height:1" id="agw-count-display">0</div>
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">participantes</div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--orange)" id="agw-cost-display">0 pts</div>
+                <div style="font-size:10px;color:var(--muted)">custo entrada</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Participantes -->
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Participantes</div>
+        <div id="agw-parts-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;min-height:32px"></div>
+        <!-- Vencedor -->
+        <div id="agw-winner-area" style="display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:14px;text-align:center;margin-bottom:16px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:6px">🏆 Vencedor sorteado</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.06em" id="agw-winner-display">—</div>
+        </div>
+        <!-- Acções -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-action" onclick="drawGiveaway()"><i class="ti ti-dice"></i>Sortear vencedor</button>
+          <button class="btn-danger" onclick="endGiveaway()"><i class="ti ti-player-stop"></i>Terminar giveaway</button>
+        </div>
+      </div>
+
+      <div id="agw-status" style="font-size:12px;color:var(--muted);padding:8px 0">Nenhum giveaway ativo de momento.</div>
     </div>
     <!-- PONTOS ADMIN -->
     <div class="as" id="as-pontos">
@@ -1193,26 +1235,86 @@ async function loadRedemptions(status){
 
 async function markRed(id,status){try{await req('PATCH',`/shop/redemptions/${id}`,{status});loadRedemptions('all');toast(status==='delivered'?'Marcado como entregue':'Reembolsado');}catch(e){toast(e.message,'err');}}
 
+let pendingGwImg = '';
+
+function previewGwImg(input){
+  if(!input.files||!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    pendingGwImg=e.target.result;
+    document.getElementById('gw-img-area').innerHTML=`<img src="${e.target.result}" style="width:80px;height:80px;border-radius:6px;object-fit:cover;margin:0 auto 6px;display:block"><div style="font-size:10px;color:var(--muted)">Clica para mudar</div>`;
+  };reader.readAsDataURL(input.files[0]);
+}
+
 async function startGiveaway(){
-  const prize=document.getElementById('agw-p').value.trim();if(!prize)return toast('Define o prémio','err');
-  try{await req('POST','/giveaway',{prize,description:document.getElementById('agw-d').value.trim(),cost:parseInt(document.getElementById('agw-c').value)||500});syncAdminGW();toast(`Giveaway "${prize}" iniciado`);}
-  catch(e){toast(e.message,'err');}
+  const prize=document.getElementById('agw-p').value.trim();
+  if(!prize)return toast('Define o prémio','err');
+  try{
+    await req('POST','/giveaway',{
+      prize,
+      description:document.getElementById('agw-d').value.trim(),
+      cost:parseInt(document.getElementById('agw-c').value)||500,
+      image_url:pendingGwImg||null
+    });
+    pendingGwImg='';
+    document.getElementById('gw-img-area').innerHTML='<i class="ti ti-photo" style="font-size:24px;color:var(--muted);margin-bottom:4px;display:block"></i><div style="font-size:11px;color:var(--muted)">Clica para carregar imagem do prémio (opcional)</div>';
+    ['agw-p','agw-d'].forEach(id=>document.getElementById(id).value='');
+    syncAdminGW();
+    toast(`Giveaway "${prize}" iniciado`);
+  }catch(e){toast(e.message,'err');}
 }
 
 async function drawGiveaway(){
   if(!gwId){const{giveaway}=await req('GET','/giveaway/active').catch(()=>({giveaway:null}));if(!giveaway)return toast('Sem giveaway ativo','err');gwId=giveaway.id;}
-  try{const{winner}=await req('POST',`/giveaway/${gwId}/draw`);document.getElementById('winner-box').classList.add('show');document.getElementById('winner-name').textContent=winner.username;toast(`Vencedor: ${winner.username}`);}
-  catch(e){toast(e.message,'err');}
+  try{
+    const{winner}=await req('POST',`/giveaway/${gwId}/draw`);
+    document.getElementById('agw-winner-area').style.display='block';
+    document.getElementById('agw-winner-display').textContent=winner.username;
+    // Também actualizar na página pública
+    document.getElementById('winner-box').classList.add('show');
+    document.getElementById('winner-name').textContent=winner.username;
+    toast(`🏆 Vencedor: ${winner.username}`);
+  }catch(e){toast(e.message,'err');}
 }
 
 async function endGiveaway(){
   if(!gwId)return toast('Sem giveaway ativo','err');
-  try{await req('DELETE',`/giveaway/${gwId}`);gwId=null;syncAdminGW();toast('Giveaway terminado.');}
-  catch(e){toast(e.message,'err');}
+  try{
+    await req('DELETE',`/giveaway/${gwId}`);
+    gwId=null;
+    syncAdminGW();
+    loadGiveaway();
+    toast('Giveaway terminado.');
+  }catch(e){toast(e.message,'err');}
 }
 
 async function syncAdminGW(){
-  try{const{giveaway}=await req('GET','/giveaway/active');document.getElementById('agw-status').textContent=giveaway?`Ativo: "${giveaway.prize}" · ${giveaway.participant_count} participantes`:'Nenhum giveaway ativo';}catch(e){}
+  try{
+    const{giveaway}=await req('GET','/giveaway/active');
+    const statusEl=document.getElementById('agw-status');
+    const activeCard=document.getElementById('agw-active-card');
+    if(giveaway){
+      gwId=giveaway.id;
+      activeCard.style.display='block';
+      statusEl.textContent='';
+      document.getElementById('agw-prize-display').textContent=giveaway.prize;
+      document.getElementById('agw-desc-display').textContent=giveaway.description||'';
+      document.getElementById('agw-cost-display').textContent=(giveaway.cost||0)+' pts';
+      document.getElementById('agw-count-display').textContent=giveaway.participant_count||0;
+      // Imagem
+      const thumb=document.getElementById('agw-thumb');
+      if(giveaway.image_url){thumb.innerHTML=`<img src="${giveaway.image_url}" style="width:100%;height:100%;object-fit:cover">`;}
+      // Participantes
+      try{
+        const parts=await req('GET',`/giveaway/${giveaway.id}/participants`);
+        document.getElementById('agw-parts-list').innerHTML=parts.slice(0,20).map(p=>`<div class="chip">${p.username}</div>`).join('')+(parts.length>20?`<div class="chip">+${parts.length-20}</div>`:'');
+      }catch(e){}
+    } else {
+      activeCard.style.display='none';
+      statusEl.textContent='Nenhum giveaway ativo de momento.';
+      document.getElementById('agw-winner-area').style.display='none';
+    }
+  }catch(e){}
 }
 
 async function givePoints(){
