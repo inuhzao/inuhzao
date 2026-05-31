@@ -1,13 +1,17 @@
 const express = require('express')
+const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
 const router = express.Router()
+
+const SE_API = 'https://api.streamelements.com/kappa/v2'
 
 // ── POST /coupons/redeem ───────────────────────────
 router.post('/redeem', requireAuth, async (req, res) => {
   const { code } = req.body
   if (!code) return res.status(400).json({ error: 'Código obrigatório.' })
 
+  // 1. Buscar cupão
   const { data: coupon, error } = await supabase
     .from('coupons')
     .select('*')
@@ -18,32 +22,54 @@ router.post('/redeem', requireAuth, async (req, res) => {
   if (coupon.used_by) return res.status(400).json({ error: 'Cupão já utilizado.' })
 
   const userId = req.session.user.id
+  const username = req.session.user.username
+  const channelId = process.env.SE_ACCOUNT_ID
 
-  // Marcar como usado + adicionar pontos
-  const [couponUpdate, userUpdate] = await Promise.all([
-    supabase.from('coupons').update({
-      used_by: userId,
-      used_at: new Date().toISOString()
-    }).eq('id', coupon.id),
+  // 2. Adicionar pontos no StreamElements
+  try {
+    await axios.put(
+      `${SE_API}/points/${channelId}/${username}/${coupon.points}`,
+      {},
+      { headers: { Authorization: `Bearer ${process.env.SE_JWT}` } }
+    )
+  } catch (seErr) {
+    console.error('SE points error:', seErr?.response?.data || seErr.message)
+    // Se o utilizador não existe no SE, tenta criar primeiro
+    try {
+      await axios.put(
+        `${SE_API}/points/${channelId}/${username}/${coupon.points}`,
+        {},
+        { headers: { Authorization: `Bearer ${process.env.SE_JWT}` } }
+      )
+    } catch (e) {
+      return res.status(500).json({ error: 'Erro ao adicionar pontos no StreamElements.' })
+    }
+  }
 
-    supabase.from('users')
-      .select('points, total_points')
-      .eq('id', userId)
-      .single()
-  ])
+  // 3. Marcar cupão como usado
+  await supabase.from('coupons').update({
+    used_by: userId,
+    used_at: new Date().toISOString()
+  }).eq('id', coupon.id)
 
-  if (userUpdate.data) {
+  // 4. Actualizar pontos na nossa BD também (para referência)
+  const { data: user } = await supabase
+    .from('users')
+    .select('points, total_points')
+    .eq('id', userId)
+    .single()
+
+  if (user) {
     await supabase.from('users').update({
-      points: (userUpdate.data.points || 0) + coupon.points,
-      total_points: (userUpdate.data.total_points || 0) + coupon.points
+      points: (user.points || 0) + coupon.points,
+      total_points: (user.total_points || 0) + coupon.points
     }).eq('id', userId)
   }
 
-  res.json({ ok: true, points: coupon.points, message: `+${coupon.points} pontos adicionados!` })
+  res.json({ ok: true, points: coupon.points, message: `+${coupon.points} pontos adicionados no StreamElements!` })
 })
 
 // ── GET /coupons ───────────────────────────────────
-// Admin: listar cupões
 router.get('/', requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from('coupons')
@@ -55,7 +81,6 @@ router.get('/', requireAdmin, async (req, res) => {
 })
 
 // ── POST /coupons ──────────────────────────────────
-// Admin: criar cupão
 router.post('/', requireAdmin, async (req, res) => {
   const { code, points, description } = req.body
   if (!code || !points) return res.status(400).json({ error: 'Código e pontos obrigatórios.' })
