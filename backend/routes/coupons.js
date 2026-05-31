@@ -11,7 +11,6 @@ router.post('/redeem', requireAuth, async (req, res) => {
   const { code } = req.body
   if (!code) return res.status(400).json({ error: 'Código obrigatório.' })
 
-  // 1. Buscar cupão
   const { data: coupon, error } = await supabase
     .from('coupons')
     .select('*')
@@ -19,54 +18,40 @@ router.post('/redeem', requireAuth, async (req, res) => {
     .single()
 
   if (error || !coupon) return res.status(404).json({ error: 'Cupão não encontrado.' })
-  if (coupon.used_by) return res.status(400).json({ error: 'Cupão já utilizado.' })
+
+  const maxUses = coupon.max_uses || 1
+  const useCount = coupon.use_count || 0
+
+  if (useCount >= maxUses) {
+    return res.status(400).json({ error: maxUses === 1 ? 'Cupão já utilizado.' : 'Cupão esgotado.' })
+  }
 
   const userId = req.session.user.id
   const username = req.session.user.username
-  const channelId = process.env.SE_ACCOUNT_ID
 
-  // 2. Adicionar pontos no StreamElements
+  // Adicionar pontos no StreamElements
   try {
     await axios.put(
-      `${SE_API}/points/${channelId}/${username}/${coupon.points}`,
+      `${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}/${coupon.points}`,
       {},
       { headers: { Authorization: `Bearer ${process.env.SE_JWT}` } }
     )
   } catch (seErr) {
-    console.error('SE points error:', seErr?.response?.data || seErr.message)
-    // Se o utilizador não existe no SE, tenta criar primeiro
-    try {
-      await axios.put(
-        `${SE_API}/points/${channelId}/${username}/${coupon.points}`,
-        {},
-        { headers: { Authorization: `Bearer ${process.env.SE_JWT}` } }
-      )
-    } catch (e) {
-      return res.status(500).json({ error: 'Erro ao adicionar pontos no StreamElements.' })
-    }
+    return res.status(500).json({ error: 'Erro ao adicionar pontos no StreamElements.' })
   }
 
-  // 3. Marcar cupão como usado
-  await supabase.from('coupons').update({
-    used_by: userId,
+  // Actualizar uso do cupão
+  const newCount = useCount + 1
+  const updateData = {
+    use_count: newCount,
     used_at: new Date().toISOString()
-  }).eq('id', coupon.id)
-
-  // 4. Actualizar pontos na nossa BD também (para referência)
-  const { data: user } = await supabase
-    .from('users')
-    .select('points, total_points')
-    .eq('id', userId)
-    .single()
-
-  if (user) {
-    await supabase.from('users').update({
-      points: (user.points || 0) + coupon.points,
-      total_points: (user.total_points || 0) + coupon.points
-    }).eq('id', userId)
   }
+  // Para compatibilidade: marcar used_by no primeiro uso
+  if (newCount === 1) updateData.used_by = userId
 
-  res.json({ ok: true, points: coupon.points, message: `+${coupon.points} pontos adicionados no StreamElements!` })
+  await supabase.from('coupons').update(updateData).eq('id', coupon.id)
+
+  res.json({ ok: true, points: coupon.points, message: `+${coupon.points} pontos adicionados!` })
 })
 
 // ── GET /coupons ───────────────────────────────────
@@ -82,12 +67,18 @@ router.get('/', requireAdmin, async (req, res) => {
 
 // ── POST /coupons ──────────────────────────────────
 router.post('/', requireAdmin, async (req, res) => {
-  const { code, points, description } = req.body
+  const { code, points, description, max_uses } = req.body
   if (!code || !points) return res.status(400).json({ error: 'Código e pontos obrigatórios.' })
 
   const { data, error } = await supabase
     .from('coupons')
-    .insert({ code: code.toUpperCase().trim(), points, description })
+    .insert({
+      code: code.toUpperCase().trim(),
+      points,
+      description,
+      max_uses: max_uses || 1,
+      use_count: 0
+    })
     .select()
     .single()
 
@@ -100,11 +91,7 @@ router.post('/', requireAdmin, async (req, res) => {
 
 // ── DELETE /coupons/:id ────────────────────────────
 router.delete('/:id', requireAdmin, async (req, res) => {
-  const { error } = await supabase
-    .from('coupons')
-    .delete()
-    .eq('id', req.params.id)
-
+  const { error } = await supabase.from('coupons').delete().eq('id', req.params.id)
   if (error) return res.status(500).json({ error: error.message })
   res.json({ ok: true })
 })

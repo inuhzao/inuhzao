@@ -357,7 +357,7 @@ select.fi option{background:var(--s2)}
     <div class="hero-name">INUH<span>ZAO</span></div>
     <p class="hero-sub">Stream. Jogo. Adrenalina.<br>A tua próxima grande jogada começa aqui.</p>
     <div class="hero-btns">
-      <button class="btn-watch" onclick="window.open('https://twitch.tv/inuhzao','_blank')">
+      <button class="btn-watch" id="btn-twitch-main">
         <i class="ti ti-brand-twitch"></i>Ver na Twitch
       </button>
 
@@ -628,6 +628,7 @@ select.fi option{background:var(--s2)}
             </div>
           </div>
           <div class="fg"><label class="fl">Pontos</label><input class="fi" type="number" id="ac-pts" placeholder="500" min="1"></div>
+          <div class="fg"><label class="fl">Máx. usos <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(1 = uso único)</span></label><input class="fi" type="number" id="ac-maxuses" placeholder="1" min="1" value="1"></div>
           <div class="fg"><label class="fl">Descrição</label><input class="fi" type="text" id="ac-desc" placeholder="Prémio giveaway..."></div>
         </div>
         <button class="btn-action" onclick="createCoupon()"><i class="ti ti-ticket"></i>Criar cupão</button>
@@ -1373,10 +1374,19 @@ async function loadAdmin(){
 function genCode(){const c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';const p=()=>Array.from({length:4},()=>c[Math.floor(Math.random()*c.length)]).join('');document.getElementById('ac-code').value=`INUH-${p()}-${p()}`;}
 
 async function createCoupon(){
-  const code=document.getElementById('ac-code').value.trim().toUpperCase(),pts=parseInt(document.getElementById('ac-pts').value)||0,desc=document.getElementById('ac-desc').value.trim();
-  if(!code)return toast('Gera ou insere um código','err');if(pts<=0)return toast('Pontos inválidos','err');
-  try{await req('POST','/coupons',{code,points:pts,description:desc});['ac-code','ac-pts','ac-desc'].forEach(id=>document.getElementById(id).value='');loadAdminCoupons();toast(`Cupão "${code}" criado`);}
-  catch(e){toast(e.message,'err');}
+  const code=document.getElementById('ac-code').value.trim().toUpperCase();
+  const pts=parseInt(document.getElementById('ac-pts').value)||0;
+  const maxUses=parseInt(document.getElementById('ac-maxuses').value)||1;
+  const desc=document.getElementById('ac-desc').value.trim();
+  if(!code)return toast('Gera ou insere um código','err');
+  if(pts<=0)return toast('Pontos inválidos','err');
+  try{
+    await req('POST','/coupons',{code,points:pts,description:desc,max_uses:maxUses});
+    ['ac-code','ac-pts','ac-desc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('ac-maxuses').value='1';
+    loadAdminCoupons();
+    toast(`Cupão "${code}" criado · ${maxUses} uso${maxUses>1?'s':''}!`);
+  }catch(e){toast(e.message,'err');}
 }
 
 async function loadAdminCoupons(){
@@ -1634,6 +1644,12 @@ async function loadAdminUsers(){
     document.getElementById('admin-users-list').innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>${['Username','Pontos','Rank','Gastos','Role'].map(h=>`<th style="padding:10px 16px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)">${h}</th>`).join('')}</tr></thead><tbody>${data.map(u=>`<tr style="border-bottom:1px solid rgba(255,255,255,.03)"><td style="padding:9px 16px;font-weight:500">${u.username}</td><td style="padding:9px 16px;color:var(--orange);font-weight:700">${(u.points||0).toLocaleString()}</td><td style="padding:9px 16px;color:var(--muted)">${getRank(u.points||0)}</td><td style="padding:9px 16px;color:var(--muted)">${(u.spent_points||0).toLocaleString()}</td><td style="padding:9px 16px">${u.is_admin?'<span class="pill active">Admin</span>':'<span style="color:var(--muted)">Viewer</span>'}</td></tr>`).join('')}</tbody></table>`;
   }catch(e){toast('Erro ao carregar utilizadores','err');}
 }
+
+// ── TWITCH BUTTON ──
+document.addEventListener('DOMContentLoaded', function(){
+  const btn = document.getElementById('btn-twitch-main');
+  if(btn) btn.addEventListener('click', function(){ window.open('https://twitch.tv/inuhzao','_blank'); });
+});
 
 // ── CHECK TWITCH LIVE ──
 async function checkLive(){
