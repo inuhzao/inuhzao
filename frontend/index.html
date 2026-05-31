@@ -15,7 +15,27 @@
   --text:#e8edf5;--muted:rgba(255,255,255,.38);
   --accent:#5b9cf6;--accent2:#3b82f6;
   --orange:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;
+  --timer-color:#5b9cf6;
 }
+
+/* THEME PANEL */
+.theme-btn{position:fixed;bottom:20px;right:20px;z-index:400;width:42px;height:42px;border-radius:50%;background:var(--s1);border:1px solid var(--b2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .2s}
+.theme-btn:hover{transform:scale(1.1)}
+.theme-panel{position:fixed;bottom:72px;right:20px;z-index:400;background:var(--s1);border:1px solid var(--b2);border-radius:14px;padding:18px;width:260px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none}
+.theme-panel.open{display:block}
+.tp-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
+.tp-section{margin-bottom:14px}
+.tp-section-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.color-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:4px}
+.color-swatch{width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative}
+.color-swatch:hover{transform:scale(1.1)}
+.color-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.timer-color-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.tc-swatch{width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative}
+.tc-swatch:hover{transform:scale(1.1)}
+.tc-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.tp-reset{all:unset;box-sizing:border-box;font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;margin-top:4px;display:block}
+.tp-reset:hover{color:var(--text)}
 html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;overflow-x:hidden}
 
 /* NAV */
@@ -465,16 +485,17 @@ select.fi option{background:var(--s2)}
         <h3>Registar run</h3>
         <div class="form-grid">
           <div class="fg"><label class="fl">Cofres</label><input class="fi" type="number" id="h-cof" placeholder="0" min="0"></div>
-          <div class="fg"><label class="fl">Yang/cofre</label><input class="fi" type="number" id="h-yang" placeholder="150000" min="0"></div>
+          <div class="fg"><label class="fl">Yang/cofre</label><input class="fi" type="text" id="h-yang" placeholder="Ex: 32kk, 1w, 150000"></div>
           <div class="fg"><label class="fl">Notas</label><input class="fi" type="text" id="h-not" placeholder="Opcional"></div>
         </div>
         <button class="btn-action" onclick="addHidra()">Registar run</button>
       </div>
-      <div class="stats-g" style="margin-bottom:14px">
+      <div class="stats-g" style="margin-bottom:8px">
         <div class="stat-b"><div class="stat-l">Runs</div><div class="stat-v" id="h-r">0</div></div>
         <div class="stat-b"><div class="stat-l">Cofres</div><div class="stat-v orange" id="h-c">0</div></div>
         <div class="stat-b"><div class="stat-l">Yang total</div><div class="stat-v" id="h-y" style="color:var(--orange)">0</div></div>
       </div>
+      <div id="h-milestone" style="display:none;text-align:center;font-size:13px;font-weight:700;padding:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:8px;margin-bottom:14px;letter-spacing:.04em"></div>
       <div class="lb-card">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--b1)">
           <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Histórico</span>
@@ -771,6 +792,24 @@ select.fi option{background:var(--s2)}
   </div>
 </div>
 
+<!-- THEME PANEL -->
+<button class="theme-btn" onclick="toggleTheme()" title="Personalizar cores">🎨</button>
+<div class="theme-panel" id="theme-panel">
+  <div class="tp-title">🎨 Personalização</div>
+
+  <div class="tp-section">
+    <div class="tp-section-label">Cor de destaque do site</div>
+    <div class="color-grid" id="accent-grid"></div>
+  </div>
+
+  <div class="tp-section">
+    <div class="tp-section-label">Cor dos timers</div>
+    <div class="timer-color-grid" id="timer-color-grid"></div>
+  </div>
+
+  <button class="tp-reset" onclick="resetTheme()">Repor cores originais</button>
+</div>
+
 <script>
 const API = 'https://inuhzao-production.up.railway.app';
 
@@ -787,7 +826,28 @@ let timers = [];
 let disguises = [];
 
 // ── UTILS ──
-function fmtY(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return Math.round(n/1e3)+'K';return String(Math.round(n));}
+function fmtY(n){
+  if(n>=100000000){
+    const w=n/100000000;
+    return(w%1===0?w.toFixed(0):w.toFixed(2))+'w';
+  }
+  if(n>=1000000){
+    const kk=n/1000000;
+    return(kk%1===0?kk.toFixed(0):kk.toFixed(2))+'kk';
+  }
+  if(n>=1000)return Math.round(n/1000)+'K';
+  return String(Math.round(n));
+}
+
+// Converte input do utilizador (pode ser "32kk", "1w", "150000", etc) para número
+function parseYang(val){
+  if(!val)return 0;
+  const s=String(val).trim().toLowerCase().replace(/\s/g,'').replace(/\./g,'').replace(/,/g,'');
+  if(s.endsWith('w'))return Math.round(parseFloat(s)*100000000);
+  if(s.endsWith('kk'))return Math.round(parseFloat(s)*1000000);
+  if(s.endsWith('k'))return Math.round(parseFloat(s)*1000);
+  return Math.round(parseFloat(s)||0);
+}
 function fmtT(s){if(s<=0)return'00:00:00';const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;}
 function fmtDur(s){if(s>=86400)return Math.round(s/86400)+'d';if(s>=3600)return Math.round(s/3600)+'h';return Math.round(s/60)+'m';}
 function getRank(p){if(p>=10000)return'Lenda';if(p>=5000)return'Diamond';if(p>=2000)return'Gold';if(p>=500)return'Silver';return'Novo';}
@@ -799,6 +859,44 @@ function toast(msg,type='ok'){
   const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;
   w.appendChild(t);setTimeout(()=>t.classList.add('show'),10);
   setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},3500);
+}
+
+// Som de notificação via Web Audio API (sem ficheiro externo)
+function playAlertSound(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const notes=[523,659,784,1047]; // C5 E5 G5 C6
+    notes.forEach((freq,i)=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.type='sine';
+      osc.frequency.setValueAtTime(freq,ctx.currentTime+i*0.15);
+      gain.gain.setValueAtTime(0,ctx.currentTime+i*0.15);
+      gain.gain.linearRampToValueAtTime(0.3,ctx.currentTime+i*0.15+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.15+0.3);
+      osc.start(ctx.currentTime+i*0.15);
+      osc.stop(ctx.currentTime+i*0.15+0.35);
+    });
+  }catch(e){}
+}
+
+// Notificação do browser
+function browserNotify(title, body){
+  if(!('Notification' in window))return;
+  if(Notification.permission==='granted'){
+    new Notification(title,{body,icon:'/favicon.ico'});
+  } else if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted') new Notification(title,{body,icon:'/favicon.ico'});
+    });
+  }
+}
+
+function timerFinished(name){
+  playAlertSound();
+  browserNotify(`⏰ Timer terminado!`, `"${name}" chegou a zero.`);
+  toast(`⏰ Timer "${name}" terminou`);
 }
 
 async function req(method,path,body){
@@ -964,7 +1062,8 @@ function renderTimers(){
   if(!timers.length){g.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px;grid-column:1/-1">Sem timers. Clica em "Novo timer".</div>';return;}
   g.innerHTML=timers.map(t=>{
     const rem=t.running?getRem(t):t.total_secs;const fin=rem<=0;
-    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} total</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
+    const tc=getComputedStyle(document.documentElement).getPropertyValue('--timer-color').trim()||'#5b9cf6';
+    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}" style="${!fin?'color:'+tc:''}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} total</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
   }).join('');
   timers.forEach(t=>{if(t.running)startTimerInterval(t.id);});
 }
@@ -1036,17 +1135,40 @@ function renderHidra(){
   const tc=hidraLog.reduce((a,r)=>a+r.cofres,0),ty=hidraLog.reduce((a,r)=>a+r.yang_total,0);
   document.getElementById('h-r').textContent=hidraLog.length;
   document.getElementById('h-c').textContent=tc;
-  document.getElementById('h-y').textContent=fmtY(ty);
+  // Yang total com badge de milestone
+  const yEl=document.getElementById('h-y');
+  yEl.textContent=fmtY(ty);
+  // Milestone badge
+  const mbEl=document.getElementById('h-milestone');
+  if(mbEl){
+    if(ty>=100000000){
+      const w=ty/100000000;
+      mbEl.style.display='block';
+      mbEl.textContent=`🏆 ${(w%1===0?w.toFixed(0):w.toFixed(2))}w acumulado${w>=2?'s':''}!`;
+      mbEl.style.color=ty>=1000000000?'#ffd700':ty>=500000000?'#c084fc':'#34d399';
+    } else {
+      mbEl.style.display='none';
+    }
+  }
   const tb=document.getElementById('h-tbody');
   if(!hidraLog.length){tb.innerHTML='<tr><td colspan="6" style="padding:20px 16px;text-align:center;font-size:13px;color:var(--muted)">Sem runs ainda.</td></tr>';return;}
   tb.innerHTML=[...hidraLog].slice(0,50).map((r,i)=>{const d=new Date(r.created_at);return`<tr style="border-bottom:1px solid var(--b1)"><td style="padding:9px 16px;color:var(--muted)">${i+1}</td><td style="padding:9px 16px;font-size:11px;color:var(--muted)">${d.toLocaleDateString('pt-PT')} ${d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}</td><td style="padding:9px 16px;text-align:right;font-weight:700;color:var(--orange)">${r.cofres}</td><td style="padding:9px 16px;text-align:right;color:var(--muted)">${r.yang_por_cofre.toLocaleString()}</td><td style="padding:9px 16px;text-align:right;font-weight:700">${fmtY(r.yang_total)}</td><td style="padding:9px 16px;color:var(--muted);font-size:11px">${r.notas||'—'}</td></tr>`;}).join('');
 }
 
 async function addHidra(){
-  const c=parseInt(document.getElementById('h-cof').value),y=parseInt(document.getElementById('h-yang').value),n=document.getElementById('h-not').value.trim();
-  if(!c||c<0)return toast('Insere cofres','err');if(!y||y<0)return toast('Insere yang','err');
-  try{const r=await req('POST','/game/hidra',{cofres:c,yang_por_cofre:y,notas:n});hidraLog.unshift(r);['h-cof','h-yang','h-not'].forEach(id=>document.getElementById(id).value='');renderHidra();toast(`${c} cofres = ${fmtY(c*y)} Yang`);}
-  catch(e){toast(e.message,'err');}
+  const c=parseInt(document.getElementById('h-cof').value);
+  const yRaw=document.getElementById('h-yang').value;
+  const y=parseYang(yRaw);
+  const n=document.getElementById('h-not').value.trim();
+  if(!c||c<0)return toast('Insere cofres','err');
+  if(!y||y<0)return toast('Insere yang','err');
+  try{
+    const r=await req('POST','/game/hidra',{cofres:c,yang_por_cofre:y,notas:n});
+    hidraLog.unshift(r);
+    ['h-cof','h-yang','h-not'].forEach(id=>document.getElementById(id).value='');
+    renderHidra();
+    toast(`${c} cofres = ${fmtY(c*y)} Yang`);
+  }catch(e){toast(e.message,'err');}
 }
 
 async function clearHidra(){
@@ -1341,7 +1463,130 @@ async function checkLive(){
   document.getElementById('stream-offline').style.display='none';
 }
 
+// ── THEME ──
+const ACCENT_COLORS = [
+  {name:'Azul',value:'#5b9cf6',accent2:'#3b82f6'},
+  {name:'Roxo',value:'#8b5cf6',accent2:'#7c3aed'},
+  {name:'Rosa',value:'#ec4899',accent2:'#db2777'},
+  {name:'Vermelho',value:'#ef4444',accent2:'#dc2626'},
+  {name:'Laranja',value:'#f59e0b',accent2:'#d97706'},
+  {name:'Verde',value:'#10b981',accent2:'#059669'},
+  {name:'Ciano',value:'#06b6d4',accent2:'#0891b2'},
+  {name:'Branco',value:'#e8edf5',accent2:'#cbd5e1'},
+  {name:'Dourado',value:'#fbbf24',accent2:'#f59e0b'},
+  {name:'Lima',value:'#84cc16',accent2:'#65a30d'},
+  {name:'Índigo',value:'#6366f1',accent2:'#4f46e5'},
+  {name:'Fúcsia',value:'#d946ef',accent2:'#c026d3'},
+];
+
+const TIMER_COLORS = [
+  {name:'Azul',value:'#5b9cf6'},
+  {name:'Verde',value:'#10b981'},
+  {name:'Roxo',value:'#8b5cf6'},
+  {name:'Rosa',value:'#ec4899'},
+  {name:'Laranja',value:'#f59e0b'},
+  {name:'Vermelho',value:'#ef4444'},
+  {name:'Ciano',value:'#06b6d4'},
+  {name:'Dourado',value:'#fbbf24'},
+  {name:'Lima',value:'#84cc16'},
+  {name:'Branco',value:'#e8edf5'},
+  {name:'Fúcsia',value:'#d946ef'},
+  {name:'Índigo',value:'#6366f1'},
+];
+
+function initTheme(){
+  // Carregar tema guardado
+  const saved = localStorage.getItem('inuhzao_theme');
+  if(saved){
+    try{
+      const t=JSON.parse(saved);
+      if(t.accent) applyAccent(t.accent, t.accent2, false);
+      if(t.timer) applyTimerColor(t.timer, false);
+    }catch(e){}
+  }
+
+  // Construir grelha de cores do site
+  const ag = document.getElementById('accent-grid');
+  const saved_accent = JSON.parse(localStorage.getItem('inuhzao_theme')||'{}').accent || '#5b9cf6';
+  ag.innerHTML = ACCENT_COLORS.map(c =>
+    `<div class="color-swatch ${c.value===saved_accent?'active':''}" style="background:${c.value};border-color:${c.value===saved_accent?'#fff':'transparent'}" onclick="applyAccent('${c.value}','${c.accent2}')" title="${c.name}"></div>`
+  ).join('');
+
+  // Construir grelha de cores dos timers
+  const tg = document.getElementById('timer-color-grid');
+  const saved_timer = JSON.parse(localStorage.getItem('inuhzao_theme')||'{}').timer || '#5b9cf6';
+  tg.innerHTML = TIMER_COLORS.map(c =>
+    `<div class="tc-swatch ${c.value===saved_timer?'active':''}" style="background:${c.value};border-color:${c.value===saved_timer?'#fff':'transparent'}" onclick="applyTimerColor('${c.value}')" title="${c.name}"></div>`
+  ).join('');
+}
+
+function applyAccent(color, accent2, save=true){
+  document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--accent2', accent2||color);
+  // Actualizar swatches
+  document.querySelectorAll('.color-swatch').forEach(s=>{
+    const active = s.style.background===color || s.style.backgroundColor===color;
+    s.classList.toggle('active', active);
+    s.style.borderColor = active ? '#fff' : 'transparent';
+  });
+  if(save){
+    const t=JSON.parse(localStorage.getItem('inuhzao_theme')||'{}');
+    t.accent=color; t.accent2=accent2;
+    localStorage.setItem('inuhzao_theme', JSON.stringify(t));
+  }
+}
+
+function applyTimerColor(color, save=true){
+  document.documentElement.style.setProperty('--timer-color', color);
+  // Actualizar swatches
+  document.querySelectorAll('.tc-swatch').forEach(s=>{
+    const active = s.style.background===color || s.style.backgroundColor===color;
+    s.classList.toggle('active', active);
+    s.style.borderColor = active ? '#fff' : 'transparent';
+  });
+  // Actualizar timers visíveis
+  document.querySelectorAll('.t-disp:not(.done)').forEach(el=>{
+    el.style.color = color;
+  });
+  if(save){
+    const t=JSON.parse(localStorage.getItem('inuhzao_theme')||'{}');
+    t.timer=color;
+    localStorage.setItem('inuhzao_theme', JSON.stringify(t));
+  }
+}
+
+function toggleTheme(){
+  document.getElementById('theme-panel').classList.toggle('open');
+}
+
+// Fechar painel ao clicar fora
+document.addEventListener('click', function(e){
+  const panel=document.getElementById('theme-panel');
+  const btn=document.querySelector('.theme-btn');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && e.target!==btn){
+    panel.classList.remove('open');
+  }
+});
+
+function resetTheme(){
+  localStorage.removeItem('inuhzao_theme');
+  document.documentElement.style.removeProperty('--accent');
+  document.documentElement.style.removeProperty('--accent2');
+  document.documentElement.style.removeProperty('--timer-color');
+  initTheme();
+  toast('Cores repostas!');
+}
+
 // ── INIT ──
+// Pedir permissão de notificações
+if('Notification' in window && Notification.permission==='default'){
+  // Pedir permissão quando utilizador interagir pela primeira vez
+  document.addEventListener('click', function askNotif(){
+    Notification.requestPermission();
+    document.removeEventListener('click', askNotif);
+  }, {once:true});
+}
+
 initAuth().then(() => {
   // Restaurar última página após F5
   const saved = sessionStorage.getItem('currentPage');
@@ -1351,6 +1596,7 @@ initAuth().then(() => {
   }
 });
 checkLive();
+initTheme();
 </script>
 </body>
 </html>
