@@ -1,7 +1,25 @@
 const express = require('express')
+const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
 const router = express.Router()
+
+const SE_API = 'https://api.streamelements.com/kappa/v2'
+
+async function getSEPoints(username) {
+  try {
+    const r = await axios.get(`${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}`, {
+      headers: { Authorization: `Bearer ${process.env.SE_JWT}` }
+    })
+    return r.data.points || 0
+  } catch(e) { return 0 }
+}
+
+async function removeSEPoints(username, amount) {
+  await axios.delete(`${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}/${amount}`, {
+    headers: { Authorization: `Bearer ${process.env.SE_JWT}` }
+  })
+}
 
 // ── GET /giveaway/active ───────────────────────────
 router.get('/active', async (req, res) => {
@@ -66,22 +84,21 @@ router.post('/:id/enter', requireAuth, async (req, res) => {
     return res.status(400).json({ error: `Já atingiste o limite de ${maxTickets} tickets.` })
   }
 
-  // Verificar pontos
+  // Verificar e descontar pontos no StreamElements
   const totalCost = (gw.cost || 0) * requestedTickets
   if (totalCost > 0) {
-    const { data: user } = await supabase
-      .from('users')
-      .select('points')
-      .eq('id', userId)
-      .single()
+    const username = req.session.user.username
+    const sePoints = await getSEPoints(username)
 
-    if (!user || user.points < totalCost) {
-      return res.status(400).json({ error: `Precisas de ${totalCost} pontos para ${requestedTickets} ticket(s).` })
+    if (sePoints < totalCost) {
+      return res.status(400).json({ error: `Precisas de ${totalCost} pontos para ${requestedTickets} ticket(s). Tens ${sePoints}.` })
     }
 
-    await supabase.from('users').update({
-      points: user.points - totalCost
-    }).eq('id', userId)
+    try {
+      await removeSEPoints(username, totalCost)
+    } catch(e) {
+      return res.status(500).json({ error: 'Erro ao descontar pontos no StreamElements.' })
+    }
   }
 
   // Inserir tickets (cada ticket = 1 entrada na tabela)

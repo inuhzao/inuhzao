@@ -1,7 +1,31 @@
 const express = require('express')
+const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
 const router = express.Router()
+
+const SE_API = 'https://api.streamelements.com/kappa/v2'
+
+async function getSEPoints(username) {
+  try {
+    const r = await axios.get(`${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}`, {
+      headers: { Authorization: `Bearer ${process.env.SE_JWT}` }
+    })
+    return r.data.points || 0
+  } catch(e) { return 0 }
+}
+
+async function removeSEPoints(username, amount) {
+  await axios.delete(`${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}/${amount}`, {
+    headers: { Authorization: `Bearer ${process.env.SE_JWT}` }
+  })
+}
+
+async function addSEPoints(username, amount) {
+  await axios.put(`${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}/${amount}`, {}, {
+    headers: { Authorization: `Bearer ${process.env.SE_JWT}` }
+  })
+}
 
 // ── GET /shop ──────────────────────────────────────
 router.get('/', async (req, res) => {
@@ -31,24 +55,23 @@ router.post('/redeem', requireAuth, async (req, res) => {
   if (itemErr || !item) return res.status(404).json({ error: 'Item não encontrado.' })
   if (item.stock <= 0) return res.status(400).json({ error: 'Item sem stock.' })
 
-  // 2. Verificar pontos do utilizador
-  const { data: user } = await supabase
-    .from('users')
-    .select('points, spent_points')
-    .eq('id', userId)
-    .single()
+  // 2. Verificar pontos no StreamElements
+  const username = req.session.user.username
+  const sePoints = await getSEPoints(username)
 
-  if (!user || user.points < item.price) {
-    return res.status(400).json({ error: 'Pontos insuficientes.' })
+  if (sePoints < item.price) {
+    return res.status(400).json({ error: `Pontos insuficientes. Tens ${sePoints} pontos, precisas de ${item.price}.` })
   }
 
-  // 3. Transação: debitar pontos + reduzir stock + criar redemption
-  const [ptUpdate, stockUpdate, redemption] = await Promise.all([
-    supabase.from('users').update({
-      points: user.points - item.price,
-      spent_points: (user.spent_points || 0) + item.price
-    }).eq('id', userId),
+  // 3. Descontar pontos no SE
+  try {
+    await removeSEPoints(username, item.price)
+  } catch(e) {
+    return res.status(500).json({ error: 'Erro ao descontar pontos no StreamElements.' })
+  }
 
+  // 4. Reduzir stock + criar redemption
+  const [stockUpdate, redemption] = await Promise.all([
     supabase.from('shop_items').update({
       stock: item.stock - 1
     }).eq('id', item_id),
@@ -63,7 +86,9 @@ router.post('/redeem', requireAuth, async (req, res) => {
     }).select().single()
   ])
 
-  if (ptUpdate.error || stockUpdate.error || redemption.error) {
+  if (stockUpdate.error || redemption.error) {
+    // Tentar devolver pontos se falhou
+    try { await addSEPoints(username, item.price) } catch(e) {}
     return res.status(500).json({ error: 'Erro ao processar resgate.' })
   }
 
@@ -96,22 +121,31 @@ router.patch('/redemptions/:id', requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Status inválido.' })
   }
 
-  // Se refund, devolver pontos
+  // Se refund, devolver pontos no SE e repor stock
   if (status === 'refunded') {
     const { data: red } = await supabase
       .from('redemptions')
-      .select('*, users(points, spent_points)')
+      .select('*, users(username)')
       .eq('id', id)
       .single()
 
     if (red && red.status !== 'refunded') {
-      await supabase.from('users').update({
-        points: (red.users.points || 0) + red.price,
-        spent_points: Math.max(0, (red.users.spent_points || 0) - red.price)
-      }).eq('id', red.user_id)
+      // Devolver pontos no SE
+      try {
+        await addSEPoints(red.users?.username, red.price)
+      } catch(e) {
+        console.error('Erro ao devolver pontos SE:', e.message)
+      }
 
       // Repor stock
-      await supabase.rpc('increment_stock', { p_item_id: red.item_id })
+      const { data: shopItem } = await supabase
+        .from('shop_items')
+        .select('stock')
+        .eq('id', red.item_id)
+        .single()
+      if (shopItem) {
+        await supabase.from('shop_items').update({ stock: (shopItem.stock || 0) + 1 }).eq('id', red.item_id)
+      }
     }
   }
 
