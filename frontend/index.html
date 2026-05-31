@@ -357,7 +357,7 @@ select.fi option{background:var(--s2)}
     <div class="hero-name">INUH<span>ZAO</span></div>
     <p class="hero-sub">Stream. Jogo. Adrenalina.<br>A tua próxima grande jogada começa aqui.</p>
     <div class="hero-btns">
-      <button class="btn-watch" id="btn-twitch-main">
+      <button class="btn-watch" onclick="openTwitch()">
         <i class="ti ti-brand-twitch"></i>Ver na Twitch
       </button>
 
@@ -1646,10 +1646,7 @@ async function loadAdminUsers(){
 }
 
 // ── TWITCH BUTTON ──
-document.addEventListener('DOMContentLoaded', function(){
-  const btn = document.getElementById('btn-twitch-main');
-  if(btn) btn.addEventListener('click', function(){ window.open('https://twitch.tv/inuhzao','_blank'); });
-});
+function openTwitch(){ window.open('https://twitch.tv/inuhzao','_blank'); }
 
 // ── CHECK TWITCH LIVE ──
 async function checkLive(){
