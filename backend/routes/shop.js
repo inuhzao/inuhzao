@@ -164,6 +164,17 @@ router.patch('/redemptions/:id', requireAdmin, async (req, res) => {
   res.json(data)
 })
 
+// ── DELETE /shop/redemptions/:id ──────────────────
+// Admin: apagar resgate
+router.delete('/redemptions/:id', requireAdmin, async (req, res) => {
+  const { error } = await supabase
+    .from('redemptions')
+    .delete()
+    .eq('id', req.params.id)
+  if (error) return res.status(500).json({ error: error.message })
+  res.json({ ok: true })
+})
+
 // ── POST /shop/items ───────────────────────────────
 // Admin: criar item
 router.post('/items', requireAdmin, async (req, res) => {

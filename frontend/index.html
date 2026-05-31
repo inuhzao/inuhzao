@@ -1418,23 +1418,120 @@ async function loadAdminShop(){
     const items=await req('GET','/shop');
     document.getElementById('admin-shop-list').innerHTML=items.map(item=>{
       const img=item.image_url?`<img src="${item.image_url}" alt="${item.name}">`:`<i class="ti ti-package" style="font-size:18px;color:var(--muted)"></i>`;
-      return`<div class="item-row"><div class="item-thumb">${img}</div><div style="flex:1"><div style="font-size:13px;font-weight:600">${item.name}</div><div style="font-size:11px;color:var(--orange)">${item.price.toLocaleString()} pts</div></div><div class="stk-ctrl"><button class="stk-btn" onclick="chgStock('${item.id}',-1)">−</button><div class="stk-val" id="stk-${item.id}">${item.stock}</div><button class="stk-btn" onclick="chgStock('${item.id}',1)">+</button></div><button onclick="delItem('${item.id}')" style="all:unset;width:26px;height:26px;border-radius:4px;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.06);display:flex;align-items:center;justify-content:center;cursor:pointer"><i class="ti ti-trash" style="font-size:12px;color:var(--red)"></i></button></div>`;
+      return`<div class="item-row" id="ir-${item.id}">
+        <div class="item-thumb">${img}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
+          <div style="font-size:11px;color:var(--orange)">${item.price.toLocaleString()} pts</div>
+        </div>
+        <div class="stk-ctrl">
+          <button class="stk-btn" onclick="chgStock('${item.id}',-1)">−</button>
+          <div class="stk-val" id="stk-${item.id}">${item.stock}</div>
+          <button class="stk-btn" onclick="chgStock('${item.id}',1)">+</button>
+        </div>
+        <div id="stk-confirm-${item.id}" style="display:none;align-items:center;gap:5px">
+          <span style="font-size:11px;color:var(--muted)">Repor para:</span>
+          <input type="number" id="stk-reset-val-${item.id}" value="10" min="0" style="width:52px;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:4px 7px;border-radius:5px;font-size:12px;outline:none">
+          <button onclick="confirmResetStock('${item.id}')" style="all:unset;box-sizing:border-box;font-size:10px;font-weight:600;padding:4px 10px;border-radius:5px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:var(--green);cursor:pointer">✓ Confirmar</button>
+          <button onclick="cancelResetStock('${item.id}')" style="all:unset;font-size:10px;color:var(--muted);cursor:pointer;padding:4px 8px">✕</button>
+        </div>
+        <button onclick="showResetStock('${item.id}')" title="Repor stock" style="all:unset;width:26px;height:26px;border-radius:4px;border:1px solid rgba(59,130,246,.2);background:rgba(59,130,246,.08);display:flex;align-items:center;justify-content:center;cursor:pointer" id="stk-reset-btn-${item.id}"><i class="ti ti-refresh" style="font-size:12px;color:var(--accent)"></i></button>
+        <button onclick="delItem('${item.id}')" style="all:unset;width:26px;height:26px;border-radius:4px;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.06);display:flex;align-items:center;justify-content:center;cursor:pointer"><i class="ti ti-trash" style="font-size:12px;color:var(--red)"></i></button>
+      </div>`;
     }).join('')||'<div style="font-size:13px;color:var(--muted);padding:16px">Sem items.</div>';
   }catch(e){}
+}
+
+function showResetStock(id){
+  document.getElementById(`stk-confirm-${id}`).style.display='flex';
+  document.getElementById(`stk-reset-btn-${id}`).style.display='none';
+}
+function cancelResetStock(id){
+  document.getElementById(`stk-confirm-${id}`).style.display='none';
+  document.getElementById(`stk-reset-btn-${id}`).style.display='flex';
+}
+async function confirmResetStock(id){
+  const val=parseInt(document.getElementById(`stk-reset-val-${id}`).value)||0;
+  try{
+    await req('PATCH',`/shop/items/${id}`,{stock:val});
+    const el=document.getElementById(`stk-${id}`);
+    if(el)el.textContent=val;
+    cancelResetStock(id);
+    toast(`Stock reposto para ${val}`);
+  }catch(e){toast(e.message,'err');}
 }
 
 async function chgStock(id,d){try{const item=await req('PATCH',`/shop/items/${id}`,{stock:Math.max(0,(parseInt(document.getElementById('stk-'+id)?.textContent)||0)+d)});const el=document.getElementById('stk-'+id);if(el)el.textContent=item.stock;}catch(e){toast(e.message,'err');}}
 async function delItem(id){try{await req('DELETE',`/shop/items/${id}`);loadAdminShop();toast('Item removido.');}catch(e){toast(e.message,'err');}}
 
+let selectedRedemptions = new Set();
+
 async function loadRedemptions(status){
+  selectedRedemptions.clear();
   try{
     const data=await req('GET',`/shop/redemptions${status&&status!=='all'?'?status='+status:''}`);
-    document.getElementById('red-list').innerHTML=data.map(r=>{
-      const d=new Date(r.created_at);
-      const sClass=r.status==='pending'?'pending':r.status==='delivered'?'delivered':'refunded';
-      return`<div class="red-row ${sClass}"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${r.item_name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${r.users?.username||''} · ${d.toLocaleDateString('pt-PT')} · ${r.price.toLocaleString()} pts</div></div><span class="pill ${r.status==='delivered'?'active':'used'}" style="${r.status==='pending'?'background:rgba(245,158,11,.1);color:var(--orange)':''}">${r.status==='pending'?'Pendente':r.status==='delivered'?'Entregue':'Reembolsado'}</span><div style="display:flex;gap:5px">${r.status==='pending'?`<button class="btn-success" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','delivered')"><i class="ti ti-check"></i></button><button class="btn-danger" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','refunded')"><i class="ti ti-arrow-back-up"></i></button>`:r.status==='delivered'?`<button class="btn-danger" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','refunded')">Refund</button>`:`<button class="btn-success" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','delivered')">Reativar</button>`}</div></div>`;
-    }).join('')||'<div style="font-size:13px;color:var(--muted);padding:16px">Sem resgates.</div>';
+    const container = document.getElementById('red-list');
+    if(!data.length){container.innerHTML='<div style="font-size:13px;color:var(--muted);padding:16px">Sem resgates.</div>';return;}
+    
+    container.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--s2);border-radius:7px">
+        <input type="checkbox" id="sel-all-red" onchange="toggleAllRedemptions(this.checked)" style="width:14px;height:14px;cursor:pointer">
+        <label for="sel-all-red" style="font-size:11px;color:var(--muted);cursor:pointer">Selecionar todos</label>
+        <button onclick="deleteSelectedRedemptions()" style="all:unset;box-sizing:border-box;margin-left:auto;font-size:11px;font-weight:600;padding:5px 14px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);cursor:pointer;display:flex;align-items:center;gap:5px">
+          <i class="ti ti-trash" style="font-size:12px"></i> Apagar selecionados
+        </button>
+      </div>
+      ${data.map(r=>{
+        const d=new Date(r.created_at);
+        const sClass=r.status==='pending'?'pending':r.status==='delivered'?'delivered':'refunded';
+        const pillStyle=r.status==='pending'?'background:rgba(245,158,11,.1);color:var(--orange)':r.status==='delivered'?'background:rgba(16,185,129,.1);color:var(--green)':'background:rgba(239,68,68,.1);color:var(--red)';
+        const pillText=r.status==='pending'?'Pendente':r.status==='delivered'?'Entregue':'Reembolsado';
+        return`<div class="red-row ${sClass}" id="rrow-${r.id}" style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--s2);border-radius:7px;margin-bottom:6px;border-left:2px solid ${r.status==='pending'?'var(--orange)':r.status==='delivered'?'var(--green)':'var(--red)'}">
+          <input type="checkbox" class="red-checkbox" data-id="${r.id}" onchange="toggleRedSelection('${r.id}',this.checked)" style="width:14px;height:14px;cursor:pointer;flex-shrink:0">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600">${r.item_name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${r.users?.username||''} · ${d.toLocaleDateString('pt-PT')} · ${r.price.toLocaleString()} pts</div>
+          </div>
+          <span class="pill" style="${pillStyle};font-size:10px;padding:3px 8px;border-radius:4px">${pillText}</span>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            ${r.status==='pending'?
+              `<button class="btn-success" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','delivered')"><i class="ti ti-check"></i></button>
+               <button class="btn-danger" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','refunded')"><i class="ti ti-arrow-back-up"></i></button>`:
+            r.status==='delivered'?
+              `<button class="btn-danger" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','refunded')">Refund</button>`:
+              `<button class="btn-success" style="font-size:10px;padding:5px 10px" onclick="markRed('${r.id}','delivered')">Reativar</button>`}
+          </div>
+        </div>`;
+      }).join('')}
+    `;
   }catch(e){toast('Erro ao carregar resgates','err');}
+}
+
+function toggleRedSelection(id, checked){
+  if(checked) selectedRedemptions.add(id);
+  else selectedRedemptions.delete(id);
+}
+
+function toggleAllRedemptions(checked){
+  document.querySelectorAll('.red-checkbox').forEach(cb=>{
+    cb.checked=checked;
+    toggleRedSelection(cb.dataset.id, checked);
+  });
+}
+
+async function deleteSelectedRedemptions(){
+  if(!selectedRedemptions.size) return toast('Seleciona pelo menos um resgate','err');
+  if(!confirm(`Apagar ${selectedRedemptions.size} resgate(s) selecionado(s)?`)) return;
+  let ok=0;
+  for(const id of selectedRedemptions){
+    try{
+      await req('DELETE',`/shop/redemptions/${id}`);
+      document.getElementById(`rrow-${id}`)?.remove();
+      ok++;
+    }catch(e){}
+  }
+  selectedRedemptions.clear();
+  toast(`${ok} resgate(s) apagado(s)`);
 }
 
 async function markRed(id,status){try{await req('PATCH',`/shop/redemptions/${id}`,{status});loadRedemptions('all');toast(status==='delivered'?'Marcado como entregue':'Reembolsado');}catch(e){toast(e.message,'err');}}
