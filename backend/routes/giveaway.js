@@ -7,7 +7,7 @@ const router = express.Router()
 router.get('/active', async (req, res) => {
   const { data, error } = await supabase
     .from('giveaways')
-    .select('*, giveaway_entries(count)')
+    .select('*')
     .eq('active', true)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -15,7 +15,6 @@ router.get('/active', async (req, res) => {
 
   if (error) return res.json({ giveaway: null })
 
-  // Contar participantes
   const { count } = await supabase
     .from('giveaway_entries')
     .select('*', { count: 'exact', head: true })
@@ -30,7 +29,6 @@ router.get('/:id/participants', async (req, res) => {
     .from('giveaway_entries')
     .select('users(username, display_name, avatar_url)')
     .eq('giveaway_id', req.params.id)
-    .limit(20)
 
   if (error) return res.status(500).json({ error: error.message })
   res.json(data.map(e => e.users))
@@ -39,6 +37,7 @@ router.get('/:id/participants', async (req, res) => {
 // ── POST /giveaway/:id/enter ───────────────────────
 router.post('/:id/enter', requireAuth, async (req, res) => {
   const { id } = req.params
+  const { tickets = 1 } = req.body
   const userId = req.session.user.id
 
   // Buscar giveaway
@@ -51,53 +50,71 @@ router.post('/:id/enter', requireAuth, async (req, res) => {
 
   if (!gw) return res.status(404).json({ error: 'Giveaway não encontrado.' })
 
-  // Verificar se já entrou
-  const { data: existing } = await supabase
+  const maxTickets = gw.max_tickets || 5
+
+  // Contar tickets actuais do utilizador
+  const { count: myCount } = await supabase
     .from('giveaway_entries')
-    .select('id')
+    .select('*', { count: 'exact', head: true })
     .eq('giveaway_id', id)
     .eq('user_id', userId)
-    .single()
 
-  if (existing) return res.status(400).json({ error: 'Já estás inscrito.' })
+  const currentTickets = myCount || 0
+  const requestedTickets = Math.min(tickets, maxTickets - currentTickets)
+
+  if (requestedTickets <= 0) {
+    return res.status(400).json({ error: `Já atingiste o limite de ${maxTickets} tickets.` })
+  }
 
   // Verificar pontos
-  if (gw.cost > 0) {
+  const totalCost = (gw.cost || 0) * requestedTickets
+  if (totalCost > 0) {
     const { data: user } = await supabase
       .from('users')
       .select('points')
       .eq('id', userId)
       .single()
 
-    if (!user || user.points < gw.cost) {
-      return res.status(400).json({ error: `Precisas de ${gw.cost} pontos.` })
+    if (!user || user.points < totalCost) {
+      return res.status(400).json({ error: `Precisas de ${totalCost} pontos para ${requestedTickets} ticket(s).` })
     }
 
     await supabase.from('users').update({
-      points: user.points - gw.cost
+      points: user.points - totalCost
     }).eq('id', userId)
   }
 
-  await supabase.from('giveaway_entries').insert({
+  // Inserir tickets (cada ticket = 1 entrada na tabela)
+  const entries = Array.from({ length: requestedTickets }, () => ({
     giveaway_id: id,
     user_id: userId
-  })
+  }))
 
-  res.json({ ok: true })
+  // Remove unique constraint issue - use insert multiple
+  for (const entry of entries) {
+    await supabase.from('giveaway_entries').insert(entry)
+  }
+
+  res.json({ ok: true, tickets: requestedTickets, totalCost })
 })
 
 // ── POST /giveaway ─────────────────────────────────
-// Admin: criar giveaway
 router.post('/', requireAdmin, async (req, res) => {
-  const { prize, description, cost, image_url } = req.body
+  const { prize, description, cost, max_tickets, image_url } = req.body
   if (!prize) return res.status(400).json({ error: 'Prémio obrigatório.' })
 
-  // Fechar giveaways activos anteriores
   await supabase.from('giveaways').update({ active: false }).eq('active', true)
 
   const { data, error } = await supabase
     .from('giveaways')
-    .insert({ prize, description, cost: cost || 0, active: true, image_url: image_url || null })
+    .insert({
+      prize,
+      description,
+      cost: cost || 0,
+      max_tickets: max_tickets || 5,
+      active: true,
+      image_url: image_url || null
+    })
     .select()
     .single()
 
@@ -106,7 +123,6 @@ router.post('/', requireAdmin, async (req, res) => {
 })
 
 // ── POST /giveaway/:id/draw ────────────────────────
-// Admin: sortear vencedor
 router.post('/:id/draw', requireAdmin, async (req, res) => {
   const { id } = req.params
 
@@ -117,6 +133,7 @@ router.post('/:id/draw', requireAdmin, async (req, res) => {
 
   if (!entries?.length) return res.status(400).json({ error: 'Sem participantes.' })
 
+  // Cada entrada = 1 ticket = maior chance de ganhar
   const winner = entries[Math.floor(Math.random() * entries.length)]
 
   await supabase.from('giveaways').update({
@@ -127,7 +144,6 @@ router.post('/:id/draw', requireAdmin, async (req, res) => {
 })
 
 // ── DELETE /giveaway/:id ───────────────────────────
-// Admin: terminar giveaway
 router.delete('/:id', requireAdmin, async (req, res) => {
   await supabase.from('giveaways').update({
     active: false,

@@ -568,10 +568,29 @@ select.fi option{background:var(--s2)}
         <div class="gw-meta">
           <div><div class="gw-count" id="gw-cnt">0</div><div class="gw-count-l">participantes</div></div>
           <div id="gw-join-area">
-            <button class="btn-join-gw" onclick="joinGiveaway()">Participar</button>
-            <div style="font-size:11px;color:var(--muted);margin-top:5px">Custo: <strong id="gw-cost" style="color:var(--orange)">0</strong> pontos</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:4px 6px">
+                <button onclick="changeTickets(-1)" style="all:unset;width:28px;height:28px;border-radius:6px;background:var(--s3);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">−</button>
+                <div style="min-width:32px;text-align:center">
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;line-height:1" id="ticket-qty">1</div>
+                  <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">tickets</div>
+                </div>
+                <button onclick="changeTickets(1)" style="all:unset;width:28px;height:28px;border-radius:6px;background:var(--s3);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">+</button>
+              </div>
+              <div>
+                <button class="btn-join-gw" onclick="joinGiveaway()">Participar</button>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">
+                  Custo: <strong id="gw-cost-display" style="color:var(--orange)">0</strong> pts
+                  <span style="color:var(--muted)">· Tens <strong id="gw-user-pts" style="color:var(--orange)">—</strong> pts</span>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--muted)" id="gw-max-info"></div>
           </div>
-          <div id="gw-joined-msg" style="display:none;font-size:13px;font-weight:600;color:var(--green)"><i class="ti ti-check" style="font-size:14px;vertical-align:-2px"></i> Inscrito</div>
+          <div id="gw-joined-msg" style="display:none">
+            <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px"><i class="ti ti-check" style="font-size:14px;vertical-align:-2px"></i> Inscrito</div>
+            <div style="font-size:11px;color:var(--muted)">Os teus tickets: <strong id="gw-my-tickets" style="color:var(--orange)">—</strong></div>
+          </div>
         </div>
         <div class="chips" id="gw-chips"></div>
       </div>
@@ -667,7 +686,8 @@ select.fi option{background:var(--s2)}
         </div>
         <div class="form-grid">
           <div class="fg"><label class="fl">Prémio</label><input class="fi" type="text" id="agw-p" placeholder="Sub gifted, merch..."></div>
-          <div class="fg"><label class="fl">Custo (pts)</label><input class="fi" type="number" id="agw-c" value="500"></div>
+          <div class="fg"><label class="fl">Custo por ticket (pts)</label><input class="fi" type="number" id="agw-c" value="500" min="0"></div>
+          <div class="fg"><label class="fl">Máx. tickets por pessoa</label><input class="fi" type="number" id="agw-max" value="5" min="1" max="100" placeholder="5"></div>
           <div class="fg" style="grid-column:1/-1"><label class="fl">Descrição</label><input class="fi" type="text" id="agw-d" placeholder="Descrição do prémio..."></div>
         </div>
         <button class="btn-success" onclick="startGiveaway()"><i class="ti ti-player-play"></i>Iniciar giveaway</button>
@@ -690,7 +710,11 @@ select.fi option{background:var(--s2)}
               </div>
               <div>
                 <div style="font-size:12px;font-weight:600;color:var(--orange)" id="agw-cost-display">0 pts</div>
-                <div style="font-size:10px;color:var(--muted)">custo entrada</div>
+                <div style="font-size:10px;color:var(--muted)">por ticket</div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--accent)" id="agw-max-display">—</div>
+                <div style="font-size:10px;color:var(--muted)">máx. tickets/pessoa</div>
               </div>
             </div>
           </div>
@@ -1250,25 +1274,85 @@ document.getElementById('crit-ov').addEventListener('click',function(e){if(e.tar
 
 // ── GIVEAWAY ──
 let gwId=null;
+let gwCostPerTicket=0;
+let gwMaxTickets=5;
+let gwMyTickets=0;
+let selectedTickets=1;
+
+function changeTickets(delta){
+  const remaining = gwMaxTickets - gwMyTickets;
+  selectedTickets = Math.max(1, Math.min(selectedTickets+delta, remaining));
+  document.getElementById('ticket-qty').textContent=selectedTickets;
+  const total = selectedTickets * gwCostPerTicket;
+  const el=document.getElementById('gw-cost-display');
+  if(el) el.textContent=total.toLocaleString();
+  const maxEl=document.getElementById('gw-max-info');
+  if(maxEl) maxEl.textContent=`Máx. ${gwMaxTickets} tickets por pessoa · Já tens ${gwMyTickets}`;
+}
+
 async function loadGiveaway(){
   try{
     const{giveaway}=await req('GET','/giveaway/active');
     const none=document.getElementById('gw-none'),act=document.getElementById('gw-active');
     if(!giveaway){none.style.display='';act.style.display='none';return;}
-    gwId=giveaway.id;none.style.display='none';act.style.display='block';
+    gwId=giveaway.id;
+    gwCostPerTicket=giveaway.cost||0;
+    gwMaxTickets=giveaway.max_tickets||5;
+    none.style.display='none';act.style.display='block';
     document.getElementById('gw-prize').textContent=giveaway.prize;
     document.getElementById('gw-desc').textContent=giveaway.description||'';
-    document.getElementById('gw-cost').textContent=giveaway.cost;
     document.getElementById('gw-cnt').textContent=giveaway.participant_count||0;
+    // Update cost display
+    const costEl=document.getElementById('gw-cost-display');
+    if(costEl) costEl.textContent=(gwCostPerTicket).toLocaleString();
+    const costEl2=document.getElementById('gw-cost');
+    if(costEl2) costEl2.textContent=gwCostPerTicket;
+    const maxInfoEl=document.getElementById('gw-max-info');
+    if(maxInfoEl) maxInfoEl.textContent=`Máx. ${gwMaxTickets} tickets por pessoa`;
+    // User points
+    if(currentUser){
+      try{
+        const pts=await req('GET','/points/me');
+        const ptsEl=document.getElementById('gw-user-pts');
+        if(ptsEl) ptsEl.textContent=pts.points.toLocaleString();
+      }catch(e){}
+    }
+    // Check if already joined
     const parts=await req('GET',`/giveaway/${giveaway.id}/participants`);
-    document.getElementById('gw-chips').innerHTML=parts.slice(0,12).map(p=>`<div class="chip">${p.username}</div>`).join('');
+    const myEntries=parts.filter(p=>p.username===currentUser?.username);
+    gwMyTickets=myEntries.length;
+    if(gwMyTickets>0 && gwMyTickets>=gwMaxTickets){
+      document.getElementById('gw-join-area').style.display='none';
+      document.getElementById('gw-joined-msg').style.display='block';
+      const myTEl=document.getElementById('gw-my-tickets');
+      if(myTEl) myTEl.textContent=gwMyTickets;
+    } else {
+      document.getElementById('gw-join-area').style.display='block';
+      document.getElementById('gw-joined-msg').style.display='none';
+      selectedTickets=1;
+      changeTickets(0); // refresh display
+    }
+    document.getElementById('gw-chips').innerHTML=parts.slice(0,12).map(p=>`<div class="chip">${p.username}</div>`).join('')+(parts.length>12?`<div class="chip">+${parts.length-12}</div>`:'');
   }catch(e){document.getElementById('gw-none').style.display='';document.getElementById('gw-active').style.display='none';}
 }
 
 async function joinGiveaway(){
   if(!currentUser)return showLogin();
   if(!gwId)return;
-  try{await req('POST',`/giveaway/${gwId}/enter`);document.getElementById('gw-join-area').style.display='none';document.getElementById('gw-joined-msg').style.display='block';toast('Inscrito no giveaway!');}
+  try{
+    await req('POST',`/giveaway/${gwId}/enter`,{tickets:selectedTickets});
+    gwMyTickets+=selectedTickets;
+    if(gwMyTickets>=gwMaxTickets){
+      document.getElementById('gw-join-area').style.display='none';
+      document.getElementById('gw-joined-msg').style.display='block';
+    } else {
+      selectedTickets=1;changeTickets(0);
+    }
+    const myTEl=document.getElementById('gw-my-tickets');
+    if(myTEl) myTEl.textContent=gwMyTickets;
+    toast(`${selectedTickets} ticket${selectedTickets>1?'s':''} adicionado${selectedTickets>1?'s':''}!`);
+    loadGiveaway();
+  }
   catch(e){toast(e.message,'err');}
 }
 
@@ -1374,6 +1458,7 @@ async function startGiveaway(){
       prize,
       description:document.getElementById('agw-d').value.trim(),
       cost:parseInt(document.getElementById('agw-c').value)||500,
+      max_tickets:parseInt(document.getElementById('agw-max').value)||5,
       image_url:pendingGwImg||null
     });
     pendingGwImg='';
@@ -1420,6 +1505,8 @@ async function syncAdminGW(){
       document.getElementById('agw-prize-display').textContent=giveaway.prize;
       document.getElementById('agw-desc-display').textContent=giveaway.description||'';
       document.getElementById('agw-cost-display').textContent=(giveaway.cost||0)+' pts';
+      const maxDisp=document.getElementById('agw-max-display');
+      if(maxDisp) maxDisp.textContent=(giveaway.max_tickets||5);
       document.getElementById('agw-count-display').textContent=giveaway.participant_count||0;
       // Imagem
       const thumb=document.getElementById('agw-thumb');
