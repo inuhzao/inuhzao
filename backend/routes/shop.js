@@ -16,9 +16,13 @@ async function getSEPoints(username) {
 }
 
 async function removeSEPoints(username, amount) {
-  await axios.delete(`${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}/${amount}`, {
-    headers: { Authorization: `Bearer ${process.env.SE_JWT}` }
-  })
+  // SE API: PUT with negative value to subtract points
+  const res = await axios.put(
+    `${SE_API}/points/${process.env.SE_ACCOUNT_ID}/${username}/-${amount}`,
+    {},
+    { headers: { Authorization: `Bearer ${process.env.SE_JWT}` } }
+  )
+  return res.data
 }
 
 async function addSEPoints(username, amount) {
