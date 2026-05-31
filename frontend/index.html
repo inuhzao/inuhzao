@@ -884,7 +884,14 @@ async function redeemCoupon(){
     const d=await req('POST','/coupons/redeem',{code});
     showCpnMsg('ok',`✓ +${d.points.toLocaleString()} pontos adicionados!`);
     document.getElementById('cpn-code').value='';
-    loadNavPoints();toast(`+${d.points.toLocaleString()} pontos!`);
+    loadNavPoints();
+    // Actualizar pontos no perfil sem reload
+    const prfEl=document.getElementById('prf-pts');
+    if(prfEl){const cur=parseInt(prfEl.textContent.replace(/[^0-9]/g,'')||0);prfEl.textContent=(cur+d.points).toLocaleString();}
+    // Actualizar stats
+    const totEl=document.getElementById('prf-total');
+    if(totEl){const cur=parseInt(totEl.textContent.replace(/[^0-9]/g,'')||0);totEl.textContent=(cur+d.points).toLocaleString();}
+    toast(`+${d.points.toLocaleString()} pontos!`);
   }catch(e){showCpnMsg('err',e.message);}
 }
 function showCpnMsg(t,m){const el=document.getElementById('cpn-msg');el.style.display='block';el.style.color=t==='ok'?'var(--green)':'var(--red)';el.textContent=m;if(t==='ok')setTimeout(()=>el.style.display='none',5000);}
