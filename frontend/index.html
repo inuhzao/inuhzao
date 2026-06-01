@@ -453,7 +453,7 @@ select.fi option{background:var(--s2)}
                 <div style="width:20px;height:20px;border-radius:50%;background:#5865f2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
                 <div>
                   <div style="font-size:12px;font-weight:600;color:var(--text)">Entra no servidor Discord da stream</div>
-                  <a href="https://discord.gg/3vvwxZv9xV" target="_blank" rel="noopener" style="font-size:11px;color:#a5b4fc;text-decoration:none">discord.gg/inuhzao <i class="ti ti-arrow-up-right" style="font-size:10px"></i></a>
+                  <a href="https://discord.gg/inuhzao" target="_blank" rel="noopener" style="font-size:11px;color:#a5b4fc;text-decoration:none">discord.gg/inuhzao <i class="ti ti-arrow-up-right" style="font-size:10px"></i></a>
                 </div>
               </div>
               <div style="display:flex;gap:10px;align-items:flex-start">
@@ -847,8 +847,14 @@ select.fi option{background:var(--s2)}
     <div class="tw-ico"><i class="ti ti-brand-twitch" style="font-size:22px;color:#fff"></i></div>
     <h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.08em;margin-bottom:8px">Entrar na plataforma</h2>
     <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Liga a tua conta Twitch para acederes a pontos, loja e muito mais.</p>
-    <div style="background:rgba(145,70,255,.08);border:1px solid rgba(145,70,255,.15);border-radius:7px;padding:10px 14px;font-size:11px;color:#c4b5fd;margin-bottom:16px">
+    <div style="background:rgba(145,70,255,.08);border:1px solid rgba(145,70,255,.15);border-radius:7px;padding:10px 14px;font-size:11px;color:#c4b5fd;margin-bottom:12px">
       <i class="ti ti-lock" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>Utilizamos apenas o teu username. Acesso seguro via Twitch OAuth.
+    </div>
+    <!-- Aviso Brave -->
+    <div id="brave-warning" style="display:none;background:rgba(251,130,35,.08);border:1px solid rgba(251,130,35,.25);border-radius:7px;padding:10px 14px;font-size:11px;color:#fdba74;margin-bottom:12px;line-height:1.6">
+      <div style="font-weight:700;margin-bottom:4px"><i class="ti ti-shield-exclamation" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>Estás a usar o Brave Browser</div>
+      Para fazer login, desactiva temporariamente os <strong>Escudos do Brave</strong> neste site:<br>
+      Clica no ícone do leão 🦁 na barra de endereço → <strong>"Escudos desactivados"</strong> → recarrega a página.
     </div>
     <button class="btn-watch" onclick="doTwitchLogin()" style="width:100%;justify-content:center;border-radius:8px">
       <i class="ti ti-brand-twitch"></i>Continuar com Twitch
@@ -1090,7 +1096,7 @@ function doTwitchLogin(){
   window.location.href=API+'/auth/login';
 }
 
-function showLogin(){document.getElementById('login-modal').classList.add('open');}
+function showLogin(){document.getElementById('login-modal').classList.add('open');detectBrave();}
 function closeLogin(){document.getElementById('login-modal').classList.remove('open');}
 
 function updateNav(){
@@ -2025,6 +2031,16 @@ async function loadAdminUsers(){
 
 // ── TWITCH BUTTON ──
 function openTwitch(){ window.open('https://twitch.tv/inuhzao','_blank'); }
+
+// Detectar Brave
+async function detectBrave(){
+  try{
+    const isBrave = (navigator.brave && await navigator.brave.isBrave()) || false;
+    if(isBrave){
+      document.getElementById('brave-warning').style.display='block';
+    }
+  }catch(e){}
+}
 
 // ── CHECK TWITCH LIVE ──
 async function checkLive(){
