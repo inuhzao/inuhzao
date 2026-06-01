@@ -3,6 +3,8 @@ const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth } = require('../middleware/auth')
 const { notifyDisguise, sendDM } = require('../discord-bot')
+const { discordLimiter } = require('../middleware/rateLimit')
+const { validateDiscordId } = require('../middleware/validate')
 const router = express.Router()
 
 const DISCORD_CLIENT_ID = '1510972013416808518'
@@ -65,7 +67,7 @@ router.get('/callback', async (req, res) => {
 })
 
 // ── POST /discord/test ─────────────────────────────
-router.post('/test', requireAuth, async (req, res) => {
+router.post('/test', discordLimiter, requireAuth, async (req, res) => {
   const { data: user } = await supabase
     .from('users')
     .select('discord_id')

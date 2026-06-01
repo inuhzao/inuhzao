@@ -98,12 +98,14 @@ router.get('/disguises', requireAuth, async (req, res) => {
 router.post('/disguises', requireAuth, async (req, res) => {
   const { name, total_secs } = req.body
   if (!name || !total_secs) return res.status(400).json({ error: 'Nome e duração obrigatórios.' })
+  const { image_url } = req.body
   const { data, error } = await supabase
     .from('disguises')
     .insert({
       user_id: req.session.user.id,
       name,
       total_secs,
+      image_url: image_url || null,
       started_at: new Date().toISOString()
     }).select().single()
   if (error) return res.status(500).json({ error: error.message })

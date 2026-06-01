@@ -2,6 +2,8 @@ const express = require('express')
 const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
+const { shopLimiter } = require('../middleware/rateLimit')
+const { validateShopRedeem, validateShopItem } = require('../middleware/validate')
 const router = express.Router()
 
 const SE_API = 'https://api.streamelements.com/kappa/v2'
@@ -44,7 +46,7 @@ router.get('/', async (req, res) => {
 })
 
 // ── POST /shop/redeem ──────────────────────────────
-router.post('/redeem', requireAuth, async (req, res) => {
+router.post('/redeem', shopLimiter, requireAuth, validateShopRedeem, async (req, res) => {
   const { item_id } = req.body
   const userId = req.session.user.id
 
@@ -177,9 +179,8 @@ router.delete('/redemptions/:id', requireAdmin, async (req, res) => {
 
 // ── POST /shop/items ───────────────────────────────
 // Admin: criar item
-router.post('/items', requireAdmin, async (req, res) => {
+router.post('/items', requireAdmin, validateShopItem, async (req, res) => {
   const { name, description, price, stock, image_url } = req.body
-  if (!name || !price) return res.status(400).json({ error: 'Nome e preço obrigatórios.' })
 
   const { data, error } = await supabase
     .from('shop_items')

@@ -2,6 +2,8 @@ const express = require('express')
 const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
+const { giveawayLimiter } = require('../middleware/rateLimit')
+const { validateGiveawayEnter, validateGiveawayCreate } = require('../middleware/validate')
 const router = express.Router()
 
 const SE_API = 'https://api.streamelements.com/kappa/v2'
@@ -57,7 +59,7 @@ router.get('/:id/participants', async (req, res) => {
 })
 
 // ── POST /giveaway/:id/enter ───────────────────────
-router.post('/:id/enter', requireAuth, async (req, res) => {
+router.post('/:id/enter', giveawayLimiter, requireAuth, validateGiveawayEnter, async (req, res) => {
   const { id } = req.params
   const { tickets = 1 } = req.body
   const userId = req.session.user.id
@@ -106,9 +108,8 @@ router.post('/:id/enter', requireAuth, async (req, res) => {
 })
 
 // ── POST /giveaway ─────────────────────────────────
-router.post('/', requireAdmin, async (req, res) => {
+router.post('/', requireAdmin, validateGiveawayCreate, async (req, res) => {
   const { prize, description, cost, image_url } = req.body
-  if (!prize) return res.status(400).json({ error: 'Prémio obrigatório.' })
 
   await supabase.from('giveaways').update({ active: false }).eq('active', true)
 

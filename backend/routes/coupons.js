@@ -2,12 +2,14 @@ const express = require('express')
 const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
+const { couponLimiter } = require('../middleware/rateLimit')
+const { validateCouponRedeem, validateCouponCreate } = require('../middleware/validate')
 const router = express.Router()
 
 const SE_API = 'https://api.streamelements.com/kappa/v2'
 
 // ── POST /coupons/redeem ───────────────────────────
-router.post('/redeem', requireAuth, async (req, res) => {
+router.post('/redeem', couponLimiter, requireAuth, validateCouponRedeem, async (req, res) => {
   const { code } = req.body
   if (!code) return res.status(400).json({ error: 'Código obrigatório.' })
 
@@ -66,9 +68,8 @@ router.get('/', requireAdmin, async (req, res) => {
 })
 
 // ── POST /coupons ──────────────────────────────────
-router.post('/', requireAdmin, async (req, res) => {
+router.post('/', requireAdmin, validateCouponCreate, async (req, res) => {
   const { code, points, description, max_uses } = req.body
-  if (!code || !points) return res.status(400).json({ error: 'Código e pontos obrigatórios.' })
 
   const { data, error } = await supabase
     .from('coupons')

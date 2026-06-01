@@ -3,12 +3,17 @@ const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const session = require('express-session')
+const { generalLimiter, authLimiter } = require('./middleware/rateLimit')
 
 const app = express()
 
-// ── MIDDLEWARE ─────────────────────────────────────
-app.use(helmet({ contentSecurityPolicy: false }))
+// ── SECURITY HEADERS ───────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}))
 
+// ── CORS ───────────────────────────────────────────
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
@@ -28,10 +33,15 @@ app.use(cors({
 }))
 
 app.options('*', cors())
-app.use(express.json({ limit: '5mb' }))
-app.use(express.urlencoded({ extended: true }))
 
-// ── SESSÃO (memória — simples e fiável) ────────────
+// ── RATE LIMITING ──────────────────────────────────
+app.use(generalLimiter)
+
+// ── BODY PARSING ───────────────────────────────────
+app.use(express.json({ limit: '2mb' })) // reduzido de 5mb
+app.use(express.urlencoded({ extended: true, limit: '2mb' }))
+
+// ── SESSÃO ─────────────────────────────────────────
 app.set('trust proxy', 1)
 
 app.use(session({
@@ -47,29 +57,36 @@ app.use(session({
 }))
 
 // ── DISCORD BOT + SCHEDULER ────────────────────────
-require('./discord-bot') // inicializar bot
+require('./discord-bot')
 const { startScheduler } = require('./scheduler')
 startScheduler()
 
 // ── ROUTES ─────────────────────────────────────────
-app.use('/auth',     require('./routes/auth'))
-app.use('/discord',  require('./routes/discord-notify'))
+const { authLimiter: aLim } = require('./middleware/rateLimit')
+app.use('/auth',     authLimiter, require('./routes/auth'))
 app.use('/points',   require('./routes/points'))
 app.use('/shop',     require('./routes/shop'))
 app.use('/coupons',  require('./routes/coupons'))
 app.use('/giveaway', require('./routes/giveaway'))
 app.use('/game',     require('./routes/game'))
 app.use('/admin',    require('./routes/admin'))
+app.use('/discord',  require('./routes/discord-notify'))
 
 // ── HEALTH ─────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', env: process.env.NODE_ENV, time: new Date().toISOString() })
 })
 
-app.use((req, res) => res.status(404).json({ error: 'Rota nao encontrada.' }))
+// ── 404 ────────────────────────────────────────────
+app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada.' }))
 
+// ── ERROR HANDLER ──────────────────────────────────
 app.use((err, req, res, next) => {
+  // Não expor detalhes de erro em produção
   console.error(err.message)
+  if (err.message?.includes('CORS')) {
+    return res.status(403).json({ error: 'Acesso negado.' })
+  }
   res.status(500).json({ error: 'Erro interno.' })
 })
 

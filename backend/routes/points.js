@@ -2,6 +2,7 @@ const express = require('express')
 const axios = require('axios')
 const supabase = require('../db/supabase')
 const { requireAuth } = require('../middleware/auth')
+const { validatePoints } = require('../middleware/validate')
 const router = express.Router()
 
 const SE_API = 'https://api.streamelements.com/kappa/v2'
@@ -58,7 +59,7 @@ router.get('/leaderboard', async (req, res) => {
 
 // ── POST /points/add ───────────────────────────────
 // Admin: adicionar pontos (via SE API)
-router.post('/add', requireAuth, async (req, res) => {
+router.post('/add', requireAuth, validatePoints, async (req, res) => {
   const admins = (process.env.ADMIN_USERS || '').split(',').map(a => a.trim().toLowerCase())
   if (!admins.includes(req.session.user.username?.toLowerCase())) {
     return res.status(403).json({ error: 'Apenas admins.' })
