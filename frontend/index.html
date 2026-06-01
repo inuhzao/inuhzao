@@ -889,7 +889,7 @@ select.fi option{background:var(--s2)}
     <div class="crit-time" id="cp-time">00:00:00</div>
     <div class="crit-sub" id="cp-sub">O teu disfarce está quase a expirar. Renova agora.</div>
     <div class="crit-btns">
-      <button class="btn-action" onclick="popRenew()">Renovar disfarce</button>
+      <button class="btn-action" style="background:var(--red)" onclick="popRenew()"><i class="ti ti-player-stop"></i> Parar disfarce</button>
       <button onclick="dismissPop()" style="all:unset;box-sizing:border-box;font-size:12px;font-weight:500;padding:9px 20px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer">Fechar</button>
     </div>
   </div>
@@ -1586,8 +1586,10 @@ function showCritPop(d,rem){popId=d.id;document.getElementById('cp-name').textCo
 function dismissPop(){document.getElementById('crit-ov').classList.remove('on');if(popId!==null){const d=disguises.find(d=>d.id===popId);if(d)d._dismissed=true;}popId=null;}
 async function popRenew(){
   if(popId!==null){
-    await renewDisguise(popId);
+    const id = popId;
     dismissPop();
+    await delDisguise(id);
+    toast('Disfarce removido.');
   }
 }
 document.getElementById('crit-ov').addEventListener('click',function(e){if(e.target===this)dismissPop();});
