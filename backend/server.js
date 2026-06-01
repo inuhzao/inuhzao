@@ -46,8 +46,10 @@ app.use(session({
   }
 }))
 
-// ── DISCORD BOT ────────────────────────────────────
+// ── DISCORD BOT + SCHEDULER ────────────────────────
 require('./discord-bot') // inicializar bot
+const { startScheduler } = require('./scheduler')
+startScheduler()
 
 // ── ROUTES ─────────────────────────────────────────
 app.use('/auth',     require('./routes/auth'))
