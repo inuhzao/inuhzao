@@ -410,6 +410,25 @@ select.fi option{background:var(--s2)}
       <button class="btn-action" onclick="showLogin()" style="margin-top:14px"><i class="ti ti-brand-twitch"></i>Entrar com Twitch</button>
     </div>
     <div id="perfil-in" style="display:none">
+      <!-- Discord ID -->
+      <div class="cpn-box" style="background:rgba(88,101,242,.06);border-color:rgba(88,101,242,.15)">
+        <h3 style="color:#a5b4fc">Notificações Discord</h3>
+        <p>Cola o teu Discord ID para receberes DMs quando os disfarces estão a expirar.</p>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
+          Para obteres o teu ID: Discord → Definições → Avançado → activa "Modo Programador" → clica no teu nome com botão direito → "Copiar ID"
+        </div>
+        <div class="cpn-row">
+          <input class="cpn-inp" type="text" id="discord-id-inp" placeholder="123456789012345678" maxlength="20" style="letter-spacing:normal;text-transform:none;font-size:13px">
+          <button class="btn-purple" style="background:#5865f2" onclick="saveDiscordId()">Guardar</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="testDiscordDM()" style="all:unset;box-sizing:border-box;font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.2);color:#a5b4fc;cursor:pointer">
+            Testar DM
+          </button>
+        </div>
+        <div class="cpn-msg" id="discord-msg"></div>
+      </div>
+
       <div class="cpn-box">
         <h3>Resgatar cupão</h3>
         <p>Tens um código? Introduz abaixo para receberes os pontos.</p>
@@ -1020,6 +1039,11 @@ async function loadPerfil(){
   document.getElementById('prf-name').textContent=currentUser.display_name||currentUser.username;
   document.getElementById('prf-role').textContent=currentUser.is_admin?'Administrador':'Viewer';
   if(currentUser.avatar_url){document.getElementById('prf-av-img').src=currentUser.avatar_url;}
+  // Load discord ID
+  try{
+    const ud=await req('GET','/admin/users/me').catch(()=>null);
+    if(ud?.discord_id){document.getElementById('discord-id-inp').value=ud.discord_id;}
+  }catch(e){}
   try{
     const pts=await req('GET','/points/me');
     document.getElementById('prf-pts').textContent=pts.points.toLocaleString();
@@ -1037,6 +1061,30 @@ function renderLeaderboard(lb,myRank){
     const av=u.avatar_url?`<img src="${u.avatar_url}">`:`<span style="font-size:9px;font-weight:700">${u.username.substring(0,2).toUpperCase()}</span>`;
     return`<div class="lb-row ${isMe?'me':''}"><span class="lb-pos ${pos}">${i+1}</span><div class="lb-av">${av}</div><span class="lb-name">${u.username}${isMe?` <span style="font-size:9px;color:var(--accent)">(tu)</span>`:''}</span><span style="font-size:10px;color:var(--muted);margin-right:4px">${getRank(u.points||0)}</span><span class="lb-pts">${(u.points||0).toLocaleString()}</span></div>`;
   }).join('');
+}
+
+async function saveDiscordId(){
+  const id=document.getElementById('discord-id-inp').value.trim();
+  if(!id||!/^\d{17,20}$/.test(id))return showDiscordMsg('err','ID inválido. Deve ter 17-20 dígitos.');
+  try{
+    await req('POST','/discord/save-id',{discord_id:id});
+    showDiscordMsg('ok','✓ Discord ID guardado!');
+  }catch(e){showDiscordMsg('err',e.message);}
+}
+
+async function testDiscordDM(){
+  try{
+    await req('POST','/discord/test');
+    showDiscordMsg('ok','✓ DM enviada! Verifica o Discord.');
+  }catch(e){showDiscordMsg('err',e.message);}
+}
+
+function showDiscordMsg(t,m){
+  const el=document.getElementById('discord-msg');
+  el.style.display='block';
+  el.style.color=t==='ok'?'var(--green)':'var(--red)';
+  el.textContent=m;
+  if(t==='ok')setTimeout(()=>el.style.display='none',4000);
 }
 
 async function redeemCoupon(){
@@ -1266,6 +1314,18 @@ function renderDisguises(){
   disguises.forEach(d=>startDisguiseInterval(d.id));
 }
 
+async function sendDiscordDisguiseNotif(disguiseId, name, rem, zone){
+  if(!currentUser) return;
+  try{
+    await req('POST','/discord/notify-disguise',{
+      user_id: currentUser.id,
+      disguise_name: name,
+      remaining_secs: rem,
+      zone
+    });
+  }catch(e){} // silencioso
+}
+
 function startDisguiseInterval(id){
   clearInterval(disgIntvs[id]);
   disgIntvs[id]=setInterval(()=>{
@@ -1275,12 +1335,13 @@ function startDisguiseInterval(id){
     const bel=document.getElementById('db-'+id);if(bel){const pct=Math.max(0,rem/d.total_secs*100);bel.style.width=pct.toFixed(1)+'%';bel.style.background=zone==='ok'?'var(--green)':zone==='warn'?'var(--orange)':'var(--red)';}
     const cel=document.getElementById('dc-'+id);if(cel){cel.classList.remove('warn','crit');if(zone==='warn')cel.classList.add('warn');else if(zone==='crit')cel.classList.add('crit');}
     if(!sentNots[id])sentNots[id]=[];
-    if(rem===86400&&!sentNots[id].includes('1d')){sentNots[id].push('1d');toast(`"${d.name}": 1 dia restante`);}
-    if(rem===36000&&!sentNots[id].includes('10h')){sentNots[id].push('10h');toast(`"${d.name}": 10 horas restantes`);}
-    if(rem===3600&&!sentNots[id].includes('1h')){sentNots[id].push('1h');toast(`"${d.name}": 1 hora restante`);}
+    if(rem===86400&&!sentNots[id].includes('1d')){sentNots[id].push('1d');toast(`"${d.name}": 1 dia restante`);sendDiscordDisguiseNotif(d.id,d.name,rem,'warn');}
+    if(rem===36000&&!sentNots[id].includes('10h')){sentNots[id].push('10h');toast(`"${d.name}": 10 horas restantes`);sendDiscordDisguiseNotif(d.id,d.name,rem,'warn');}
+    if(rem===3600&&!sentNots[id].includes('1h')){sentNots[id].push('1h');toast(`"${d.name}": 1 hora restante`);sendDiscordDisguiseNotif(d.id,d.name,rem,'crit');}
+    if(rem===1800&&!sentNots[id].includes('30m')){sentNots[id].push('30m');toast(`"${d.name}": 30 minutos restantes`,'err');sendDiscordDisguiseNotif(d.id,d.name,rem,'crit');}
     if(zone==='crit'&&!d._popShown&&!d._dismissed){d._popShown=true;if(popId===null)showCritPop(d,rem);}
     if(zone==='crit'&&d._dismissed&&rem<=300&&popId===null){d._dismissed=false;}
-    if(rem<=0&&!d._exp){d._exp=true;toast(`"${d.name}" expirou`,'err');if(popId===d.id)dismissPop();}
+    if(rem<=0&&!d._exp){d._exp=true;toast(`"${d.name}" expirou`,'err');sendDiscordDisguiseNotif(d.id,d.name,0,'exp');if(popId===d.id)dismissPop();}
     if(id===popId)document.getElementById('cp-time').textContent=fmtT(rem);
   },1000);
 }

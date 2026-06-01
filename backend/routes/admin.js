@@ -50,4 +50,15 @@ router.patch('/users/:id', requireAdmin, async (req, res) => {
   res.json(data)
 })
 
+// ── GET /admin/users/me ────────────────────────────
+router.get('/users/me', async (req, res) => {
+  if (!req.session?.user) return res.json({})
+  const { data } = await supabase
+    .from('users')
+    .select('discord_id')
+    .eq('id', req.session.user.id)
+    .single()
+  res.json(data || {})
+})
+
 module.exports = router

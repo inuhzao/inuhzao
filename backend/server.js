@@ -46,8 +46,12 @@ app.use(session({
   }
 }))
 
+// ── DISCORD BOT ────────────────────────────────────
+require('./discord-bot') // inicializar bot
+
 // ── ROUTES ─────────────────────────────────────────
 app.use('/auth',     require('./routes/auth'))
+app.use('/discord',  require('./routes/discord-notify'))
 app.use('/points',   require('./routes/points'))
 app.use('/shop',     require('./routes/shop'))
 app.use('/coupons',  require('./routes/coupons'))
