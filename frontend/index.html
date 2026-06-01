@@ -565,15 +565,9 @@ select.fi option{background:var(--s2)}
         <h3>Adicionar disfarce</h3>
         <div class="form-row">
           <div class="fg"><label class="fl">Nome</label><input class="fi" type="text" id="dg-n" placeholder="Ex: Guerreiro das Sombras"></div>
-          <div class="fg" style="max-width:160px"><label class="fl">Duração</label>
-            <select class="fi" id="dg-dur">
-              <option value="3600">1 hora</option>
-              <option value="36000">10 horas</option>
-              <option value="86400" selected>1 dia</option>
-              <option value="custom">Personalizado</option>
-            </select>
-          </div>
-          <div class="fg" id="dg-cw" style="max-width:110px;display:none"><label class="fl">Horas</label><input class="fi" type="number" id="dg-ch" placeholder="5" min="1"></div>
+          <div class="fg" style="max-width:70px"><label class="fl">Dias</label><input class="fi" type="number" id="dg-dd" value="0" min="0" placeholder="0"></div>
+          <div class="fg" style="max-width:70px"><label class="fl">Horas</label><input class="fi" type="number" id="dg-hh" value="1" min="0" max="23" placeholder="1"></div>
+          <div class="fg" style="max-width:70px"><label class="fl">Minutos</label><input class="fi" type="number" id="dg-mm" value="0" min="0" max="59" placeholder="0"></div>
           <button class="btn-teal" onclick="addDisguise()">Adicionar</button>
         </div>
       </div>
@@ -811,16 +805,17 @@ select.fi option{background:var(--s2)}
 <!-- TIMER MODAL -->
 <div class="modal-ov" id="timer-modal" onclick="if(event.target===this)closeTimerModal()">
   <div class="modal">
-    <h2>Novo timer</h2>
+    <h2 id="tm-modal-title">Novo timer</h2>
     <div class="form-grid">
       <div class="fg" style="grid-column:1/-1"><label class="fl">Nome</label><input class="fi" type="text" id="tm-n" placeholder="Ex: Hidra, Boss..."></div>
-      <div class="fg"><label class="fl">Horas</label><input class="fi" type="number" id="tm-h" value="0" min="0"></div>
+      <div class="fg"><label class="fl">Dias</label><input class="fi" type="number" id="tm-d" value="0" min="0"></div>
+      <div class="fg"><label class="fl">Horas</label><input class="fi" type="number" id="tm-h" value="0" min="0" max="23"></div>
       <div class="fg"><label class="fl">Minutos</label><input class="fi" type="number" id="tm-m" value="20" min="0" max="59"></div>
       <div class="fg"><label class="fl">Segundos</label><input class="fi" type="number" id="tm-s" value="0" min="0" max="59"></div>
     </div>
     <div class="modal-footer">
       <button onclick="closeTimerModal()" style="all:unset;box-sizing:border-box;font-size:12px;font-weight:500;padding:9px 20px;border-radius:6px;background:var(--s2);color:var(--muted);cursor:pointer">Cancelar</button>
-      <button class="btn-action" onclick="addTimer()">Criar timer</button>
+      <button class="btn-action" id="tm-submit-btn" onclick="submitTimerModal()">Criar timer</button>
     </div>
   </div>
 </div>
@@ -1184,23 +1179,71 @@ function renderTimers(){
     const cardBg = tc.bg;
     const cardBorder = tc.border;
     const textColor = fin ? 'var(--green)' : tc.text;
-    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}" style="background:${cardBg};border-color:${cardBorder}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}" style="color:${textColor}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} total</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" style="background:${cardBg};border-color:${cardBorder};color:${tc.text}" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc" onclick="showTimerColorPicker('${t.id}',this)" aria-label="cor" title="Mudar cor"><i class="ti ti-palette"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
+    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}" style="background:${cardBg};border-color:${cardBorder}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}" style="color:${textColor}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} total</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" style="background:${cardBg};border-color:${cardBorder};color:${tc.text}" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc" onclick="showTimerModal('${t.id}')" aria-label="editar" title="Editar timer"><i class="ti ti-pencil"></i></button><button class="tc" onclick="showTimerColorPicker('${t.id}',this)" aria-label="cor" title="Mudar cor"><i class="ti ti-palette"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
   }).join('');
   timers.forEach(t=>{if(t.running)startTimerInterval(t.id);});
 }
 
-function showTimerModal(){document.getElementById('timer-modal').classList.add('open');}
-function closeTimerModal(){document.getElementById('timer-modal').classList.remove('open');}
+let editingTimerId = null;
 
-async function addTimer(){
+function showTimerModal(timerId){
+  editingTimerId = timerId || null;
+  const modal = document.getElementById('timer-modal');
+  const title = document.getElementById('tm-modal-title');
+  const btn = document.getElementById('tm-submit-btn');
+  if(timerId){
+    const t = timers.find(t=>t.id===timerId);
+    if(!t) return;
+    title.textContent = 'Editar timer';
+    btn.textContent = 'Guardar';
+    document.getElementById('tm-n').value = t.name;
+    const rem = t.running ? Math.max(0,getRem(t)) : t.total_secs;
+    document.getElementById('tm-d').value = Math.floor(rem/86400);
+    document.getElementById('tm-h').value = Math.floor((rem%86400)/3600);
+    document.getElementById('tm-m').value = Math.floor((rem%3600)/60);
+    document.getElementById('tm-s').value = rem%60;
+  } else {
+    title.textContent = 'Novo timer';
+    btn.textContent = 'Criar timer';
+    document.getElementById('tm-n').value='';
+    document.getElementById('tm-d').value='0';
+    document.getElementById('tm-h').value='0';
+    document.getElementById('tm-m').value='20';
+    document.getElementById('tm-s').value='0';
+  }
+  modal.classList.add('open');
+}
+
+function closeTimerModal(){
+  document.getElementById('timer-modal').classList.remove('open');
+  editingTimerId = null;
+}
+
+async function submitTimerModal(){
   const name=document.getElementById('tm-n').value.trim()||'Timer';
-  const tot=(parseInt(document.getElementById('tm-h').value)||0)*3600+(parseInt(document.getElementById('tm-m').value)||0)*60+(parseInt(document.getElementById('tm-s').value)||0);
+  const tot=(parseInt(document.getElementById('tm-d').value)||0)*86400+(parseInt(document.getElementById('tm-h').value)||0)*3600+(parseInt(document.getElementById('tm-m').value)||0)*60+(parseInt(document.getElementById('tm-s').value)||0);
   if(tot<=0)return toast('Define um tempo válido','err');
-  try{
-    const t=await req('POST','/game/timers',{name,total_secs:tot});
-    timers.push(t);closeTimerModal();document.getElementById('tm-n').value='';
-    renderTimers();toast(`Timer "${name}" criado`);
-  }catch(e){toast(e.message,'err');}
+  if(editingTimerId){
+    // Editar timer existente
+    try{
+      clearInterval(timerIntvs[editingTimerId]);
+      delete timerIntvs[editingTimerId];
+      const updated = await req('PATCH',`/game/timers/${editingTimerId}`,{running:false,started_at:null});
+      // Update name and total_secs locally
+      const idx = timers.findIndex(t=>t.id===editingTimerId);
+      if(idx>=0){timers[idx].name=name;timers[idx].total_secs=tot;timers[idx].running=false;timers[idx].started_at=null;}
+      closeTimerModal();
+      renderTimers();
+      toast(`Timer "${name}" actualizado`);
+    }catch(e){toast(e.message,'err');}
+  } else {
+    // Criar novo
+    try{
+      const t=await req('POST','/game/timers',{name,total_secs:tot});
+      timers.push(t);closeTimerModal();
+      renderTimers();toast(`Timer "${name}" criado`);
+    }catch(e){toast(e.message,'err');}
+  }
 }
 
 async function togTimer(id){
@@ -1307,16 +1350,27 @@ async function loadDisfarces(){
   renderDisguises();
 }
 
-document.getElementById('dg-dur').addEventListener('change',function(){document.getElementById('dg-cw').style.display=this.value==='custom'?'flex':'none';});
+
 
 async function addDisguise(){
   if(!currentUser)return showLogin();
-  const name=document.getElementById('dg-n').value.trim();if(!name)return toast('Insere o nome','err');
-  const durSel=document.getElementById('dg-dur').value;
-  let secs=durSel==='custom'?(parseInt(document.getElementById('dg-ch').value)||0)*3600:parseInt(durSel);
-  if(secs<=0)return toast('Duração inválida','err');
-  try{const d=await req('POST','/game/disguises',{name,total_secs:secs});disguises.push(d);document.getElementById('dg-n').value='';renderDisguises();toast(`"${name}" adicionado`);}
-  catch(e){toast(e.message,'err');}
+  const name=document.getElementById('dg-n').value.trim();
+  if(!name)return toast('Insere o nome','err');
+  const days=parseInt(document.getElementById('dg-dd').value)||0;
+  const hours=parseInt(document.getElementById('dg-hh').value)||0;
+  const mins=parseInt(document.getElementById('dg-mm').value)||0;
+  const secs=days*86400+hours*3600+mins*60;
+  if(secs<=0)return toast('Define uma duração válida','err');
+  try{
+    const d=await req('POST','/game/disguises',{name,total_secs:secs});
+    disguises.push(d);
+    document.getElementById('dg-n').value='';
+    document.getElementById('dg-dd').value='0';
+    document.getElementById('dg-hh').value='1';
+    document.getElementById('dg-mm').value='0';
+    renderDisguises();
+    toast(`"${name}" adicionado`);
+  }catch(e){toast(e.message,'err');}
 }
 
 async function delDisguise(id){
@@ -1391,7 +1445,12 @@ function startDisguiseInterval(id){
 
 function showCritPop(d,rem){popId=d.id;document.getElementById('cp-name').textContent=d.name;document.getElementById('cp-time').textContent=fmtT(rem);document.getElementById('crit-ov').classList.add('on');}
 function dismissPop(){document.getElementById('crit-ov').classList.remove('on');if(popId!==null){const d=disguises.find(d=>d.id===popId);if(d)d._dismissed=true;}popId=null;}
-function popRenew(){if(popId!==null)renewDisguise(popId);}
+async function popRenew(){
+  if(popId!==null){
+    await renewDisguise(popId);
+    dismissPop();
+  }
+}
 document.getElementById('crit-ov').addEventListener('click',function(e){if(e.target===this)dismissPop();});
 
 // ── GIVEAWAY ──
