@@ -414,15 +414,17 @@ select.fi option{background:var(--s2)}
       <div class="cpn-box" style="background:rgba(88,101,242,.06);border-color:rgba(88,101,242,.15)" id="discord-box">
         <h3 style="color:#a5b4fc">Notificações Discord</h3>
         <p>Liga a tua conta Discord para receberes DMs quando os disfarces estão a expirar.</p>
+
         <!-- Estado: não ligado -->
         <div id="discord-not-connected">
           <a class="btn-purple" style="background:#5865f2;display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:38px;border-radius:7px;text-decoration:none;font-size:13px;font-weight:600;color:#fff" href="https://inuhzao-production.up.railway.app/discord/connect">
             <i class="ti ti-brand-discord" style="font-size:15px"></i>Ligar conta Discord
           </a>
         </div>
+
         <!-- Estado: ligado -->
         <div id="discord-connected" style="display:none">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
             <div style="width:32px;height:32px;border-radius:50%;background:rgba(88,101,242,.2);display:flex;align-items:center;justify-content:center">
               <i class="ti ti-brand-discord" style="color:#a5b4fc;font-size:16px"></i>
             </div>
@@ -431,7 +433,7 @@ select.fi option{background:var(--s2)}
               <div style="font-size:11px;color:var(--green)">✓ Conta ligada</div>
             </div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
             <button onclick="testDiscordDM()" style="all:unset;box-sizing:border-box;font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.2);color:#a5b4fc;cursor:pointer">
               <i class="ti ti-send" style="font-size:12px;vertical-align:-1px"></i> Testar DM
             </button>
@@ -439,7 +441,46 @@ select.fi option{background:var(--s2)}
               Desligar
             </button>
           </div>
+
+          <!-- Guia caso DM falhe -->
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px">
+            <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">
+              <i class="ti ti-info-circle" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>
+              Se não receberes DMs, segue estes passos:
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:20px;height:20px;border-radius:50%;background:#5865f2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Entra no servidor Discord da stream</div>
+                  <a href="https://discord.gg/3vvwxZv9xV" target="_blank" rel="noopener" style="font-size:11px;color:#a5b4fc;text-decoration:none">discord.gg/inuhzao <i class="ti ti-arrow-up-right" style="font-size:10px"></i></a>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:20px;height:20px;border-radius:50%;background:#5865f2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Permite mensagens de bots</div>
+                  <div style="font-size:11px;color:var(--muted);line-height:1.5">Discord → <strong style="color:var(--text)">Definições</strong> → <strong style="color:var(--text)">Privacidade e Segurança</strong> → Activa <strong style="color:var(--text)">"Permitir mensagens privadas de membros do servidor"</strong></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:20px;height:20px;border-radius:50%;background:#5865f2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Testa a ligação</div>
+                  <div style="font-size:11px;color:var(--muted)">Clica em <strong style="color:var(--text)">"Testar DM"</strong> acima para confirmar que está a funcionar.</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.08);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">4</div>
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Ainda não funciona?</div>
+                  <div style="font-size:11px;color:var(--muted)">No Discord, clica com o botão direito no bot <strong style="color:var(--text)">Inuhzao</strong> → <strong style="color:var(--text)">"Mensagem"</strong> para abrir o chat com o bot. Isto desbloqueará as DMs.</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
         <div class="cpn-msg" id="discord-msg"></div>
       </div>
 
