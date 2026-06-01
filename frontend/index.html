@@ -563,8 +563,15 @@ select.fi option{background:var(--s2)}
     <div id="gw-active" style="display:none">
       <div class="gw-box">
         <div class="gw-live-badge"><span class="badge-dot"></span>Giveaway ativo</div>
-        <div class="gw-prize" id="gw-prize">—</div>
-        <div class="gw-desc" id="gw-desc"></div>
+        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:6px">
+          <div id="gw-img-public" style="display:none;width:80px;height:80px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid var(--b2)">
+            <img id="gw-img-public-img" src="" alt="prémio" style="width:100%;height:100%;object-fit:cover">
+          </div>
+          <div style="flex:1">
+            <div class="gw-prize" id="gw-prize">—</div>
+            <div class="gw-desc" id="gw-desc"></div>
+          </div>
+        </div>
         <div class="gw-meta">
           <div><div class="gw-count" id="gw-cnt">0</div><div class="gw-count-l">participantes</div></div>
           <div id="gw-join-area">
@@ -580,19 +587,18 @@ select.fi option{background:var(--s2)}
               <div>
                 <button class="btn-join-gw" onclick="joinGiveaway()">Participar</button>
                 <div style="font-size:11px;color:var(--muted);margin-top:4px">
-                  Custo: <strong id="gw-cost-display" style="color:var(--orange)">0</strong> pts
-                  <span style="color:var(--muted)">· Tens <strong id="gw-user-pts" style="color:var(--orange)">—</strong> pts</span>
+                  Custo: <strong id="gw-cost-display" style="color:var(--orange)">0</strong> pts por ticket
+                  · Tens <strong id="gw-user-pts" style="color:var(--orange)">—</strong> pts
                 </div>
               </div>
             </div>
-            <div style="font-size:11px;color:var(--muted)" id="gw-max-info"></div>
           </div>
           <div id="gw-joined-msg" style="display:none">
             <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px"><i class="ti ti-check" style="font-size:14px;vertical-align:-2px"></i> Inscrito</div>
             <div style="font-size:11px;color:var(--muted)">Os teus tickets: <strong id="gw-my-tickets" style="color:var(--orange)">—</strong></div>
           </div>
         </div>
-        <div class="chips" id="gw-chips"></div>
+  
       </div>
       <div class="winner-box" id="winner-box">
         <div class="winner-label">🏆 Vencedor</div>
@@ -688,7 +694,7 @@ select.fi option{background:var(--s2)}
         <div class="form-grid">
           <div class="fg"><label class="fl">Prémio</label><input class="fi" type="text" id="agw-p" placeholder="Sub gifted, merch..."></div>
           <div class="fg"><label class="fl">Custo por ticket (pts)</label><input class="fi" type="number" id="agw-c" value="500" min="0"></div>
-          <div class="fg"><label class="fl">Máx. tickets por pessoa</label><input class="fi" type="number" id="agw-max" value="5" min="1" max="100" placeholder="5"></div>
+
           <div class="fg" style="grid-column:1/-1"><label class="fl">Descrição</label><input class="fi" type="text" id="agw-d" placeholder="Descrição do prémio..."></div>
         </div>
         <button class="btn-success" onclick="startGiveaway()"><i class="ti ti-player-play"></i>Iniciar giveaway</button>
@@ -713,10 +719,7 @@ select.fi option{background:var(--s2)}
                 <div style="font-size:12px;font-weight:600;color:var(--orange)" id="agw-cost-display">0 pts</div>
                 <div style="font-size:10px;color:var(--muted)">por ticket</div>
               </div>
-              <div>
-                <div style="font-size:12px;font-weight:600;color:var(--accent)" id="agw-max-display">—</div>
-                <div style="font-size:10px;color:var(--muted)">máx. tickets/pessoa</div>
-              </div>
+
             </div>
           </div>
         </div>
@@ -798,6 +801,20 @@ select.fi option{background:var(--s2)}
     <div class="modal-footer">
       <button onclick="closeBuyModal()" style="all:unset;box-sizing:border-box;font-size:12px;font-weight:500;padding:9px 20px;border-radius:6px;background:var(--s2);color:var(--muted);cursor:pointer">Cancelar</button>
       <button class="btn-action" onclick="confirmBuy()"><i class="ti ti-check"></i>Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- WINNER POPUP -->
+<div class="crit-ov" id="winner-popup-ov" style="z-index:999">
+  <div class="crit-pop" style="background:linear-gradient(145deg,#1a1000,#2a1f00);border-color:var(--orange)">
+    <div style="font-size:40px;margin-bottom:8px;animation:shake .5s ease-in-out infinite alternate">🏆</div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);margin-bottom:6px">Vencedor do Giveaway</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:4px" id="wp-prize">—</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.04em;color:var(--orange);line-height:1;margin:8px 0;animation:tblink 1s ease-in-out infinite" id="wp-winner">—</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Parabéns! Contacta o streamer no Discord.</div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button onclick="closeWinnerPopup()" style="all:unset;box-sizing:border-box;font-size:13px;font-weight:600;padding:11px 28px;border-radius:100px;background:var(--orange);color:#1a0a00;cursor:pointer">Fechar</button>
     </div>
   </div>
 </div>
@@ -1281,17 +1298,15 @@ let gwMyTickets=0;
 let selectedTickets=1;
 
 function changeTickets(delta){
-  const remaining = gwMaxTickets - gwMyTickets;
-  selectedTickets = Math.max(1, Math.min(selectedTickets+delta, remaining));
+  selectedTickets = Math.max(1, selectedTickets+delta);
   document.getElementById('ticket-qty').textContent=selectedTickets;
   const total = selectedTickets * gwCostPerTicket;
   const el=document.getElementById('gw-cost-display');
-  if(el) el.textContent=total.toLocaleString();
-  const maxEl=document.getElementById('gw-max-info');
-  if(maxEl) maxEl.textContent=`Máx. ${gwMaxTickets} tickets por pessoa · Já tens ${gwMyTickets}`;
+  if(el) el.textContent=gwCostPerTicket.toLocaleString();
 }
 
 async function loadGiveaway(){
+  renderGwHistory();
   try{
     const{giveaway}=await req('GET','/giveaway/active');
     const none=document.getElementById('gw-none'),act=document.getElementById('gw-active');
@@ -1302,6 +1317,15 @@ async function loadGiveaway(){
     none.style.display='none';act.style.display='block';
     document.getElementById('gw-prize').textContent=giveaway.prize;
     document.getElementById('gw-desc').textContent=giveaway.description||'';
+    // Imagem do prémio
+    const imgWrap=document.getElementById('gw-img-public');
+    const imgEl=document.getElementById('gw-img-public-img');
+    if(giveaway.image_url && imgWrap && imgEl){
+      imgEl.src=giveaway.image_url;
+      imgWrap.style.display='block';
+    } else if(imgWrap){
+      imgWrap.style.display='none';
+    }
     document.getElementById('gw-cnt').textContent=giveaway.participant_count||0;
     // Update cost display
     const costEl=document.getElementById('gw-cost-display');
@@ -1333,7 +1357,7 @@ async function loadGiveaway(){
       selectedTickets=1;
       changeTickets(0); // refresh display
     }
-    document.getElementById('gw-chips').innerHTML=parts.slice(0,12).map(p=>`<div class="chip">${p.username}</div>`).join('')+(parts.length>12?`<div class="chip">+${parts.length-12}</div>`:'');
+
   }catch(e){document.getElementById('gw-none').style.display='';document.getElementById('gw-active').style.display='none';}
 }
 
@@ -1343,15 +1367,14 @@ async function joinGiveaway(){
   try{
     await req('POST',`/giveaway/${gwId}/enter`,{tickets:selectedTickets});
     gwMyTickets+=selectedTickets;
-    if(gwMyTickets>=gwMaxTickets){
-      document.getElementById('gw-join-area').style.display='none';
-      document.getElementById('gw-joined-msg').style.display='block';
-    } else {
-      selectedTickets=1;changeTickets(0);
-    }
+    selectedTickets=1;
+    document.getElementById('ticket-qty').textContent=1;
     const myTEl=document.getElementById('gw-my-tickets');
     if(myTEl) myTEl.textContent=gwMyTickets;
-    toast(`${selectedTickets} ticket${selectedTickets>1?'s':''} adicionado${selectedTickets>1?'s':''}!`);
+    document.getElementById('gw-joined-msg').style.display='block';
+    const myTicketsEl=document.getElementById('gw-my-tickets');
+    if(myTicketsEl) myTicketsEl.textContent=gwMyTickets;
+    toast(`Inscrito com ${selectedTickets} ticket${selectedTickets>1?'s':''}!`);
     loadGiveaway();
   }
   catch(e){toast(e.message,'err');}
@@ -1565,7 +1588,7 @@ async function startGiveaway(){
       prize,
       description:document.getElementById('agw-d').value.trim(),
       cost:parseInt(document.getElementById('agw-c').value)||500,
-      max_tickets:parseInt(document.getElementById('agw-max').value)||5,
+
       image_url:pendingGwImg||null
     });
     pendingGwImg='';
@@ -1580,11 +1603,14 @@ async function drawGiveaway(){
   if(!gwId){const{giveaway}=await req('GET','/giveaway/active').catch(()=>({giveaway:null}));if(!giveaway)return toast('Sem giveaway ativo','err');gwId=giveaway.id;}
   try{
     const{winner}=await req('POST',`/giveaway/${gwId}/draw`);
+    const prize = document.getElementById('agw-prize-display')?.textContent || '';
     document.getElementById('agw-winner-area').style.display='block';
     document.getElementById('agw-winner-display').textContent=winner.username;
-    // Também actualizar na página pública
-    document.getElementById('winner-box').classList.add('show');
+    // Actualizar na página pública
     document.getElementById('winner-name').textContent=winner.username;
+    document.getElementById('gw-winner-box').style.display='block';
+    // Mostrar popup para todos
+    showWinnerPopup(winner.username, prize);
     toast(`🏆 Vencedor: ${winner.username}`);
   }catch(e){toast(e.message,'err');}
 }
@@ -1621,7 +1647,12 @@ async function syncAdminGW(){
       // Participantes
       try{
         const parts=await req('GET',`/giveaway/${giveaway.id}/participants`);
-        document.getElementById('agw-parts-list').innerHTML=parts.slice(0,20).map(p=>`<div class="chip">${p.username}</div>`).join('')+(parts.length>20?`<div class="chip">+${parts.length-20}</div>`:'');
+        const aCounts = {};
+        parts.forEach(p => { aCounts[p.username] = (aCounts[p.username]||0) + 1; });
+        const aUnique = Object.entries(aCounts).sort((a,b)=>b[1]-a[1]);
+        document.getElementById('agw-parts-list').innerHTML=aUnique.slice(0,20).map(([name,cnt])=>
+          `<div class="chip">${name}${cnt>1?` <strong style="color:var(--orange)">x${cnt}</strong>`:''}</div>`
+        ).join('')+(aUnique.length>20?`<div class="chip">+${aUnique.length-20}</div>`:'');
       }catch(e){}
     } else {
       activeCard.style.display='none';
@@ -1783,6 +1814,48 @@ document.addEventListener('click', function(e){
     panel.classList.remove('open');
   }
 });
+
+// ── WINNER POPUP ──
+let gwWinnerHistory = JSON.parse(localStorage.getItem('gw_winner_history') || '[]');
+
+function showWinnerPopup(winner, prize){
+  document.getElementById('wp-winner').textContent = winner;
+  document.getElementById('wp-prize').textContent = prize || '';
+  document.getElementById('winner-popup-ov').classList.add('on');
+  // Save to history
+  gwWinnerHistory.unshift({winner, prize, date: new Date().toISOString()});
+  if(gwWinnerHistory.length > 20) gwWinnerHistory = gwWinnerHistory.slice(0,20);
+  localStorage.setItem('gw_winner_history', JSON.stringify(gwWinnerHistory));
+  renderGwHistory();
+}
+
+function closeWinnerPopup(){
+  document.getElementById('winner-popup-ov').classList.remove('on');
+}
+
+document.getElementById('winner-popup-ov')?.addEventListener('click', function(e){
+  if(e.target===this) closeWinnerPopup();
+});
+
+function renderGwHistory(){
+  const el = document.getElementById('gw-history-list');
+  if(!el) return;
+  if(!gwWinnerHistory.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--muted)">Sem histórico ainda.</div>';
+    return;
+  }
+  el.innerHTML = gwWinnerHistory.map(h => {
+    const d = new Date(h.date);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s2);border-radius:7px;margin-bottom:6px;border-left:2px solid var(--orange)">
+      <div style="font-size:16px">🏆</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--orange)">${h.winner}</div>
+        ${h.prize?`<div style="font-size:11px;color:var(--muted)">${h.prize}</div>`:''}
+      </div>
+      <div style="font-size:10px;color:var(--muted)">${d.toLocaleDateString('pt-PT')} ${d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`;
+  }).join('');
+}
 
 function resetTheme(){
   localStorage.removeItem('inuhzao_theme2');

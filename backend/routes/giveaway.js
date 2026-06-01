@@ -72,21 +72,7 @@ router.post('/:id/enter', requireAuth, async (req, res) => {
 
   if (!gw) return res.status(404).json({ error: 'Giveaway não encontrado.' })
 
-  const maxTickets = gw.max_tickets || 5
-
-  // Contar tickets actuais do utilizador
-  const { count: myCount } = await supabase
-    .from('giveaway_entries')
-    .select('*', { count: 'exact', head: true })
-    .eq('giveaway_id', id)
-    .eq('user_id', userId)
-
-  const currentTickets = myCount || 0
-  const requestedTickets = Math.min(tickets, maxTickets - currentTickets)
-
-  if (requestedTickets <= 0) {
-    return res.status(400).json({ error: `Já atingiste o limite de ${maxTickets} tickets.` })
-  }
+  const requestedTickets = Math.max(1, parseInt(tickets) || 1)
 
   // Verificar e descontar pontos no StreamElements
   const totalCost = (gw.cost || 0) * requestedTickets
@@ -121,7 +107,7 @@ router.post('/:id/enter', requireAuth, async (req, res) => {
 
 // ── POST /giveaway ─────────────────────────────────
 router.post('/', requireAdmin, async (req, res) => {
-  const { prize, description, cost, max_tickets, image_url } = req.body
+  const { prize, description, cost, image_url } = req.body
   if (!prize) return res.status(400).json({ error: 'Prémio obrigatório.' })
 
   await supabase.from('giveaways').update({ active: false }).eq('active', true)
@@ -132,7 +118,6 @@ router.post('/', requireAdmin, async (req, res) => {
       prize,
       description,
       cost: cost || 0,
-      max_tickets: max_tickets || 5,
       active: true,
       image_url: image_url || null
     })
