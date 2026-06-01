@@ -1607,8 +1607,10 @@ async function drawGiveaway(){
     document.getElementById('agw-winner-area').style.display='block';
     document.getElementById('agw-winner-display').textContent=winner.username;
     // Actualizar na página pública
-    document.getElementById('winner-name').textContent=winner.username;
-    document.getElementById('gw-winner-box').style.display='block';
+    const wnEl=document.getElementById('winner-name');
+    if(wnEl) wnEl.textContent=winner.username;
+    const wbEl=document.getElementById('winner-box');
+    if(wbEl) wbEl.classList.add('show');
     // Mostrar popup para todos
     showWinnerPopup(winner.username, prize);
     toast(`🏆 Vencedor: ${winner.username}`);
