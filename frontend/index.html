@@ -1157,6 +1157,8 @@ async function loadPerfil(){
   try{
     const pts=await req('GET','/points/me');
     document.getElementById('prf-pts').textContent=pts.points.toLocaleString();
+    const ptsSufEl=document.querySelector('.pts-big-l[data-i18n]');
+    if(ptsSufEl) ptsSufEl.textContent=t('pts_suffix');
     const rankEl=document.getElementById('prf-rank-text');if(rankEl)rankEl.textContent=getRank(pts.points);
     const lb=await req('GET','/points/leaderboard');
     renderLeaderboard(lb,pts.rank);
@@ -1241,10 +1243,13 @@ async function loadLoja(){
   try{
     const[items,pts]=await Promise.all([req('GET','/shop'),req('GET','/points/me').catch(()=>({points:0}))]);
     document.getElementById('shop-pts-val').textContent=pts.points.toLocaleString();
+    // Update "your points" label
+    const spEl=document.querySelector('#loja-in .shop-pts span[data-i18n]');
+    if(spEl) spEl.textContent=t('shop_your_pts');
     document.getElementById('shop-grid').innerHTML=items.map(item=>{
       const ca=(pts.points||0)>=item.price,oos=item.stock<=0;
       const img=item.image_url?`<img src="${item.image_url}" alt="${item.name}">`:`<i class="ti ti-package shop-img-ph"></i>`;
-      return`<div class="shop-card ${oos?'oos':''}"><div class="shop-img">${img}</div><div class="shop-body"><div class="shop-name">${item.name}</div><div class="shop-desc">${item.description||''}</div><div class="shop-footer"><div><div class="shop-price">${item.price.toLocaleString()} pts</div><div class="shop-stock ${item.stock<=1?'low':''} ${oos?'out':''}">${oos?t('shop_out_stock'):t('shop_stock')+' '+item.stock}</div></div><button class="btn-buy" onclick="initBuy('${item.id}','${item.name}',${item.price},${item.stock})" ${oos||!ca?'disabled':''}>${oos?t('shop_out_stock'):ca?t('shop_redeem_btn'):t('shop_no_pts')}</button></div></div></div>`;
+      return`<div class="shop-card ${oos?'oos':''}"><div class="shop-img">${img}</div><div class="shop-body"><div class="shop-name">${item.name}</div><div class="shop-desc">${item.description||''}</div><div class="shop-footer"><div><div class="shop-price">${item.price.toLocaleString()} ${t('pts_suffix')}</div><div class="shop-stock ${item.stock<=1?'low':''} ${oos?'out':''}">${oos?t('shop_out_stock'):t('shop_stock')+' '+item.stock}</div></div><button class="btn-buy" onclick="initBuy('${item.id}','${item.name}',${item.price},${item.stock})" ${oos||!ca?'disabled':''}>${oos?t('shop_out_stock'):ca?t('shop_redeem_btn'):t('shop_no_pts')}</button></div></div></div>`;
     }).join('');
   }catch(e){toast('Erro ao carregar loja','err');}
 }
@@ -1400,24 +1405,29 @@ function renderHidra(){
   const tc=hidraLog.reduce((a,r)=>a+r.cofres,0),ty=hidraLog.reduce((a,r)=>a+r.yang_total,0);
   document.getElementById('h-r').textContent=hidraLog.length;
   document.getElementById('h-c').textContent=tc;
-  // Yang total com badge de milestone
   const yEl=document.getElementById('h-y');
   yEl.textContent=fmtY(ty);
-  // Milestone badge
   const mbEl=document.getElementById('h-milestone');
   if(mbEl){
     if(ty>=100000000){
       const w=ty/100000000;
       mbEl.style.display='block';
-      mbEl.textContent=`🏆 ${(w%1===0?w.toFixed(0):w.toFixed(2))}w acumulado${w>=2?'s':''}!`;
+      mbEl.textContent=`🏆 ${(w%1===0?w.toFixed(0):w.toFixed(2))}w!`;
       mbEl.style.color=ty>=1000000000?'#ffd700':ty>=500000000?'#c084fc':'#34d399';
-    } else {
-      mbEl.style.display='none';
-    }
+    } else { mbEl.style.display='none'; }
   }
+  // Update static labels via t()
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.dataset.i18n;
+    if(el.tagName==='OPTION') el.textContent=t(k);
+    else if(el.tagName==='BUTTON') el.textContent=t(k);
+    else el.innerHTML=t(k);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
   const tb=document.getElementById('h-tbody');
   if(!hidraLog.length){tb.innerHTML=`<tr><td colspan="6" style="padding:20px 16px;text-align:center;font-size:13px;color:var(--muted)">${t('hidra_empty')}</td></tr>`;return;}
-  tb.innerHTML=[...hidraLog].slice(0,50).map((r,i)=>{const d=new Date(r.created_at);return`<tr style="border-bottom:1px solid var(--b1)"><td style="padding:9px 16px;color:var(--muted)">${i+1}</td><td style="padding:9px 16px;font-size:11px;color:var(--muted)">${d.toLocaleDateString('pt-PT')} ${d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}</td><td style="padding:9px 16px;text-align:right;font-weight:700;color:var(--orange)">${r.cofres}</td><td style="padding:9px 16px;text-align:right;color:var(--muted)">${r.yang_por_cofre.toLocaleString()}</td><td style="padding:9px 16px;text-align:right;font-weight:700">${fmtY(r.yang_total)}</td><td style="padding:9px 16px;color:var(--muted);font-size:11px">${r.notas||'—'}</td></tr>`;}).join('');
+  const locale=currentLang==='de'?'de-DE':currentLang==='tr'?'tr-TR':currentLang==='en'?'en-GB':'pt-PT';
+  tb.innerHTML=[...hidraLog].slice(0,50).map((r,i)=>{const d=new Date(r.created_at);return`<tr style="border-bottom:1px solid var(--b1)"><td style="padding:9px 16px;color:var(--muted)">${i+1}</td><td style="padding:9px 16px;font-size:11px;color:var(--muted)">${d.toLocaleDateString(locale)} ${d.toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit'})}</td><td style="padding:9px 16px;text-align:right;font-weight:700;color:var(--orange)">${r.cofres}</td><td style="padding:9px 16px;text-align:right;color:var(--muted)">${r.yang_por_cofre.toLocaleString()}</td><td style="padding:9px 16px;text-align:right;font-weight:700">${fmtY(r.yang_total)}</td><td style="padding:9px 16px;color:var(--muted);font-size:11px">${r.notas||'—'}</td></tr>`;}).join('');
 }
 
 async function addHidra(){
