@@ -2734,12 +2734,17 @@ function applyLang(){
 }
 
 function updateNavLang(){
-  // Update nav right area login/logout button text
   const navRight = document.getElementById('nav-right');
-  if(navRight){
-    const loginBtn = navRight.querySelector('.btn-login span[data-i18n]');
-    if(loginBtn) loginBtn.textContent = t('login_btn');
-  }
+  if(!navRight) return;
+  // Login button
+  const loginBtn = navRight.querySelector('.btn-login span[data-i18n]');
+  if(loginBtn) loginBtn.textContent = t('login_btn');
+  // Logout button - find by onclick
+  const logoutBtn = navRight.querySelector('button[onclick="doLogout()"]');
+  if(logoutBtn) logoutBtn.textContent = t('logout_btn');
+  // Nav points suffix
+  const navPts = document.getElementById('nav-pts');
+  if(navPts && currentUser) loadNavPoints();
 }
 
 function updateTimersLang(){
