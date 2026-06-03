@@ -458,38 +458,38 @@ select.fi option{background:var(--s2)}
           </div>
 
           <!-- Guia caso DM falhe -->
-          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px">
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px" id="dc-guide">
             <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">
               <i class="ti ti-info-circle" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>
-              Se não receberes DMs, segue estes passos:
+              <span data-i18n="dc_guide_title">SE NÃO RECEBERES DMS, SEGUE ESTES PASSOS:</span>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px">
               <div style="display:flex;gap:10px;align-items:flex-start">
                 <div style="width:20px;height:20px;border-radius:50%;background:#5865f2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
                 <div>
-                  <div style="font-size:12px;font-weight:600;color:var(--text)">Entra no servidor Discord da stream</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)" data-i18n="dc_step1_title">Entra no servidor Discord da stream</div>
                   <a href="https://discord.gg/inuhzao" target="_blank" rel="noopener" style="font-size:11px;color:#a5b4fc;text-decoration:none">discord.gg/inuhzao <i class="ti ti-arrow-up-right" style="font-size:10px"></i></a>
                 </div>
               </div>
               <div style="display:flex;gap:10px;align-items:flex-start">
                 <div style="width:20px;height:20px;border-radius:50%;background:#5865f2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
                 <div>
-                  <div style="font-size:12px;font-weight:600;color:var(--text)">Permite mensagens de bots</div>
-                  <div style="font-size:11px;color:var(--muted);line-height:1.5">Discord → <strong style="color:var(--text)">Definições</strong> → <strong style="color:var(--text)">Privacidade e Segurança</strong> → Activa <strong style="color:var(--text)">"Permitir mensagens privadas de membros do servidor"</strong></div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)" data-i18n="dc_step2_title">Permite mensagens de bots</div>
+                  <div style="font-size:11px;color:var(--muted);line-height:1.5" data-i18n="dc_step2_desc">Discord → <strong style="color:var(--text)">Definições</strong> → <strong style="color:var(--text)">Privacidade e Segurança</strong> → Activa <strong style="color:var(--text)">"Permitir mensagens privadas de membros do servidor"</strong></div>
                 </div>
               </div>
               <div style="display:flex;gap:10px;align-items:flex-start">
                 <div style="width:20px;height:20px;border-radius:50%;background:#5865f2;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
                 <div>
-                  <div style="font-size:12px;font-weight:600;color:var(--text)">Testa a ligação</div>
-                  <div style="font-size:11px;color:var(--muted)">Clica em <strong style="color:var(--text)">"Testar DM"</strong> acima para confirmar que está a funcionar.</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)" data-i18n="dc_step3_title">Testa a ligação</div>
+                  <div style="font-size:11px;color:var(--muted)" data-i18n="dc_step3_desc">Clica em <strong style="color:var(--text)">"Testar DM"</strong> acima para confirmar que está a funcionar.</div>
                 </div>
               </div>
               <div style="display:flex;gap:10px;align-items:flex-start">
                 <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.08);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">4</div>
                 <div>
-                  <div style="font-size:12px;font-weight:600;color:var(--text)">Ainda não funciona?</div>
-                  <div style="font-size:11px;color:var(--muted)">No Discord, clica com o botão direito no bot <strong style="color:var(--text)">Inuhzao</strong> → <strong style="color:var(--text)">"Mensagem"</strong> para abrir o chat com o bot. Isto desbloqueará as DMs.</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)" data-i18n="dc_step4_title">Ainda não funciona?</div>
+                  <div style="font-size:11px;color:var(--muted)" data-i18n="dc_step4_desc">No Discord, clica com o botão direito no bot <strong style="color:var(--text)">Inuhzao</strong> → <strong style="color:var(--text)">"Mensagem"</strong> para abrir o chat com o bot.</div>
                 </div>
               </div>
             </div>
@@ -587,17 +587,17 @@ select.fi option{background:var(--s2)}
       <div id="h-milestone" style="display:none;text-align:center;font-size:13px;font-weight:700;padding:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:8px;margin-bottom:14px;letter-spacing:.04em"></div>
       <div class="lb-card">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--b1)">
-          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Histórico</span>
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)" data-i18n="hidra_history">Histórico</span>
           <button class="btn-danger" style="font-size:10px;padding:4px 10px" onclick="clearHidra()" data-i18n="hidra_clear">Limpar</button>
         </div>
         <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px" id="h-table">
           <thead><tr>
             <th style="padding:10px 16px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)">#</th>
-            <th style="padding:10px 16px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)">Data</th>
-            <th style="padding:10px 16px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)">Cofres</th>
-            <th style="padding:10px 16px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)">Yang/cofre</th>
-            <th style="padding:10px 16px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)">Total</th>
-            <th style="padding:10px 16px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)">Notas</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)" data-i18n="hidra_col_date">Data</th>
+            <th style="padding:10px 16px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)" data-i18n="hidra_col_cofres">Cofres</th>
+            <th style="padding:10px 16px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)" data-i18n="hidra_col_yang">Yang/cofre</th>
+            <th style="padding:10px 16px;text-align:right;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)" data-i18n="hidra_col_total">Total</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--b1)" data-i18n="hidra_col_notes">Notas</th>
           </tr></thead>
           <tbody id="h-tbody"></tbody>
         </table></div>
@@ -624,10 +624,10 @@ select.fi option{background:var(--s2)}
           <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
             <label class="fl">Tipo</label>
             <select class="fi" id="dg-type" onchange="updateDgTypeImg()" style="min-width:110px">
-              <option value="traje">Traje</option>
-              <option value="arma">Arma</option>
-              <option value="penteado">Penteado</option>
-              <option value="outro">Outro</option>
+              <option value="traje" data-i18n="dg_type_traje">Traje</option>
+              <option value="arma" data-i18n="dg_type_arma">Arma</option>
+              <option value="penteado" data-i18n="dg_type_penteado">Penteado</option>
+              <option value="outro" data-i18n="dg_type_outro">Outro</option>
             </select>
             <!-- Preview da imagem do tipo -->
             <div id="dg-type-preview" style="width:52px;height:52px;border-radius:8px;overflow:hidden;background:var(--s3);display:flex;align-items:center;justify-content:center;border:1px solid var(--b2);cursor:pointer" onclick="document.getElementById('dg-custom-img').click()" title="Clica para imagem personalizada">
@@ -1412,7 +1412,7 @@ function renderHidra(){
     }
   }
   const tb=document.getElementById('h-tbody');
-  if(!hidraLog.length){tb.innerHTML='<tr><td colspan="6" style="padding:20px 16px;text-align:center;font-size:13px;color:var(--muted)">Sem runs ainda.</td></tr>';return;}
+  if(!hidraLog.length){tb.innerHTML=`<tr><td colspan="6" style="padding:20px 16px;text-align:center;font-size:13px;color:var(--muted)">${t('hidra_empty')}</td></tr>`;return;}
   tb.innerHTML=[...hidraLog].slice(0,50).map((r,i)=>{const d=new Date(r.created_at);return`<tr style="border-bottom:1px solid var(--b1)"><td style="padding:9px 16px;color:var(--muted)">${i+1}</td><td style="padding:9px 16px;font-size:11px;color:var(--muted)">${d.toLocaleDateString('pt-PT')} ${d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}</td><td style="padding:9px 16px;text-align:right;font-weight:700;color:var(--orange)">${r.cofres}</td><td style="padding:9px 16px;text-align:right;color:var(--muted)">${r.yang_por_cofre.toLocaleString()}</td><td style="padding:9px 16px;text-align:right;font-weight:700">${fmtY(r.yang_total)}</td><td style="padding:9px 16px;color:var(--muted);font-size:11px">${r.notas||'—'}</td></tr>`;}).join('');
 }
 
@@ -2309,6 +2309,17 @@ const LANGS = {
     hidra_runs:'Runs', hidra_cofres:'Cofres', hidra_yang:'Yang total',
     hidra_add:'Registar run', hidra_clear:'Limpar',
     hidra_history:'Histórico',
+    hidra_section:'Registar run',
+    hidra_col_cofres:'Cofres', hidra_col_yang:'Yang/Cofre', hidra_col_total:'Total', hidra_col_notes:'Notas', hidra_col_date:'Data',
+    hidra_notes_ph:'Opcional', hidra_empty:'Sem runs ainda.',
+    dc_guide_title:'SE NÃO RECEBERES DMS, SEGUE ESTES PASSOS:',
+    dc_step1_title:'Entra no servidor Discord da stream',
+    dc_step2_title:'Permite mensagens de bots',
+    dc_step2_desc:'Discord → <strong style="color:var(--text)">Definições</strong> → <strong style="color:var(--text)">Privacidade e Segurança</strong> → Activa <strong style="color:var(--text)">"Permitir mensagens privadas de membros do servidor"</strong>',
+    dc_step3_title:'Testa a ligação',
+    dc_step3_desc:'Clica em <strong style="color:var(--text)">"Testar DM"</strong> acima para confirmar que está a funcionar.',
+    dc_step4_title:'Ainda não funciona?',
+    dc_step4_desc:'No Discord, clica com o botão direito no bot <strong style="color:var(--text)">Inuhzao</strong> → <strong style="color:var(--text)">"Mensagem"</strong> para abrir o chat com o bot. Isto desbloqueará as DMs.',
   },
   en: {
     flag:'🇬🇧', code:'EN',
@@ -2370,6 +2381,17 @@ const LANGS = {
     hidra_runs:'Runs', hidra_cofres:'Chests', hidra_yang:'Total Yang',
     hidra_add:'Log run', hidra_clear:'Clear',
     hidra_history:'History',
+    hidra_section:'Log run',
+    hidra_col_cofres:'Chests', hidra_col_yang:'Yang/Chest', hidra_col_total:'Total', hidra_col_notes:'Notes', hidra_col_date:'Date',
+    hidra_notes_ph:'Optional', hidra_empty:'No runs yet.',
+    dc_guide_title:"IF YOU DON'T RECEIVE DMS, FOLLOW THESE STEPS:",
+    dc_step1_title:'Join the stream Discord server',
+    dc_step2_title:'Allow messages from bots',
+    dc_step2_desc:'Discord → <strong style="color:var(--text)">Settings</strong> → <strong style="color:var(--text)">Privacy & Safety</strong> → Enable <strong style="color:var(--text)">"Allow direct messages from server members"</strong>',
+    dc_step3_title:'Test the connection',
+    dc_step3_desc:'Click <strong style="color:var(--text)">"Test DM"</strong> above to confirm it's working.',
+    dc_step4_title:'Still not working?',
+    dc_step4_desc:'On Discord, right-click on the <strong style="color:var(--text)">Inuhzao</strong> bot → <strong style="color:var(--text)">"Message"</strong> to open the chat with the bot. This will unblock DMs.',
   },
   de: {
     flag:'🇩🇪', code:'DE',
@@ -2431,6 +2453,17 @@ const LANGS = {
     hidra_runs:'Runs', hidra_cofres:'Truhen', hidra_yang:'Yang gesamt',
     hidra_add:'Run erfassen', hidra_clear:'Leeren',
     hidra_history:'Verlauf',
+    hidra_section:'Run erfassen',
+    hidra_col_cofres:'Truhen', hidra_col_yang:'Yang/Truhe', hidra_col_total:'Gesamt', hidra_col_notes:'Notizen', hidra_col_date:'Datum',
+    hidra_notes_ph:'Optional', hidra_empty:'Noch keine Runs.',
+    dc_guide_title:'WENN DU KEINE DMS ERHÄLTST, FOLGE DIESEN SCHRITTEN:',
+    dc_step1_title:'Tritt dem Discord-Server des Streams bei',
+    dc_step2_title:'Erlaube Nachrichten von Bots',
+    dc_step2_desc:'Discord → <strong style="color:var(--text)">Einstellungen</strong> → <strong style="color:var(--text)">Datenschutz & Sicherheit</strong> → Aktiviere <strong style="color:var(--text)">"Direktnachrichten von Servermitgliedern erlauben"</strong>',
+    dc_step3_title:'Teste die Verbindung',
+    dc_step3_desc:'Klicke auf <strong style="color:var(--text)">"DM testen"</strong> oben, um zu bestätigen, dass es funktioniert.',
+    dc_step4_title:'Funktioniert immer noch nicht?',
+    dc_step4_desc:'Klicke auf Discord mit der rechten Maustaste auf den Bot <strong style="color:var(--text)">Inuhzao</strong> → <strong style="color:var(--text)">"Nachricht"</strong>, um den Chat mit dem Bot zu öffnen.',
   },
   tr: {
     flag:'🇹🇷', code:'TR',
@@ -2492,6 +2525,17 @@ const LANGS = {
     hidra_runs:'Runlar', hidra_cofres:'Sandıklar', hidra_yang:'Toplam Yang',
     hidra_add:'Run Kaydet', hidra_clear:'Temizle',
     hidra_history:'Geçmiş',
+    hidra_section:'Run Kaydet',
+    hidra_col_cofres:'Sandıklar', hidra_col_yang:'Yang/Sandık', hidra_col_total:'Toplam', hidra_col_notes:'Notlar', hidra_col_date:'Tarih',
+    hidra_notes_ph:'İsteğe bağlı', hidra_empty:'Henüz run yok.',
+    dc_guide_title:'DM ALMIYORSAN BU ADIMLARI TAKİP ET:',
+    dc_step1_title:'Stream Discord sunucusuna katıl',
+    dc_step2_title:'Bot mesajlarına izin ver',
+    dc_step2_desc:'Discord → <strong style="color:var(--text)">Ayarlar</strong> → <strong style="color:var(--text)">Gizlilik ve Güvenlik</strong> → <strong style="color:var(--text)">"Sunucu üyelerinden gelen direkt mesajlara izin ver"</strong> seçeneğini etkinleştir',
+    dc_step3_title:'Bağlantıyı test et',
+    dc_step3_desc:'Çalıştığını doğrulamak için yukarıdaki <strong style="color:var(--text)">"DM Test Et"</strong> düğmesine tıkla.',
+    dc_step4_title:'Hâlâ çalışmıyor mu?',
+    dc_step4_desc:'Discord'da <strong style="color:var(--text)">Inuhzao</strong> botuna sağ tıkla → Botla sohbeti açmak için <strong style="color:var(--text)">"Mesaj"</strong> seçeneğine tıkla.',
   }
 };
 
@@ -2537,6 +2581,7 @@ function applyLang(){
     const key = el.dataset.i18n;
     if(el.tagName==='INPUT' && el.placeholder !== undefined) el.placeholder = t(key);
     else if(el.tagName==='BUTTON') el.textContent = t(key);
+    else if(el.tagName==='OPTION') el.textContent = t(key);
     else el.innerHTML = t(key);
   });
   // Placeholder i18n
