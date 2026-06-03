@@ -427,8 +427,8 @@ select.fi option{background:var(--s2)}
     <div id="perfil-in" style="display:none">
       <!-- Discord OAuth -->
       <div class="cpn-box" style="background:rgba(88,101,242,.06);border-color:rgba(88,101,242,.15)" id="discord-box">
-        <h3 style="color:#a5b4fc">Notificações Discord</h3>
-        <p>Liga a tua conta Discord para receberes DMs quando os disfarces estão a expirar.</p>
+        <h3 style="color:#a5b4fc" data-i18n="discord_title">Notificações Discord</h3>
+        <p data-i18n="discord_sub">Liga a tua conta Discord para receberes DMs quando os disfarces estão a expirar.</p>
 
         <!-- Estado: não ligado -->
         <div id="discord-not-connected">
@@ -500,11 +500,11 @@ select.fi option{background:var(--s2)}
       </div>
 
       <div class="cpn-box">
-        <h3>Resgatar cupão</h3>
-        <p>Tens um código? Introduz abaixo para receberes os pontos.</p>
+        <h3 data-i18n="coupon_title">Resgatar cupão</h3>
+        <p data-i18n="coupon_sub">Tens um código? Introduz abaixo para receberes os pontos.</p>
         <div class="cpn-row">
           <input class="cpn-inp" type="text" id="cpn-code" placeholder="INUH-XXXX-XXXX" maxlength="20" oninput="this.value=this.value.toUpperCase()">
-          <button class="btn-purple" onclick="redeemCoupon()">Resgatar</button>
+          <button class="btn-purple" onclick="redeemCoupon()" data-i18n="coupon_btn">Resgatar</button>
         </div>
         <div class="cpn-msg" id="cpn-msg"></div>
       </div>
@@ -544,8 +544,8 @@ select.fi option{background:var(--s2)}
       <button class="btn-action" onclick="showLogin()" style="margin-top:14px"><i class="ti ti-brand-twitch"></i>Entrar com Twitch</button>
     </div>
     <div id="loja-in" style="display:none">
-      <div class="shop-notice"><i class="ti ti-info-circle" style="flex-shrink:0"></i>Após resgatar, abre um ticket no Discord para receberes o prémio.</div>
-      <div class="shop-pts">Os teus pontos: <strong id="shop-pts-val">0</strong></div>
+      <div class="shop-notice"><i class="ti ti-info-circle" style="flex-shrink:0"></i><span data-i18n="shop_notice">Após resgatar, abre um ticket no Discord para receberes o prémio.</span></div>
+      <div class="shop-pts"><span data-i18n="your_points">Os teus pontos:</span> <strong id="shop-pts-val">0</strong></div>
       <div class="shop-grid" id="shop-grid"></div>
     </div>
   </div>
@@ -559,14 +559,14 @@ select.fi option{background:var(--s2)}
         <div class="page-title" data-i18n="timers_title">Timers</div>
         <div class="page-sub" data-i18n="timers_sub">Timers de respawn e tracker de runs</div>
       </div>
-      <button class="btn-action" id="btn-new-timer" onclick="showTimerModal()"><i class="ti ti-plus"></i>Novo timer</button>
+      <button class="btn-action" id="btn-new-timer" onclick="showTimerModal()"><i class="ti ti-plus"></i><span data-i18n="new_timer">Novo timer</span></button>
     </div>
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="showSub('timers',this)" id="stab-timers" data-i18n="tab_timers">Timers</button>
       <button class="sub-tab" onclick="showSub('hidra',this)" id="stab-hidra">Hidra Tracker</button>
     </div>
     <div class="subpage active" id="sub-timers">
-      <div class="info-bar"><i class="ti ti-info-circle" style="flex-shrink:0"></i>Os timers continuam a contar mesmo com a página fechada.</div>
+      <div class="info-bar"><i class="ti ti-info-circle" style="flex-shrink:0"></i><span data-i18n="timer_info">Os timers continuam a contar mesmo com a página fechada.</span></div>
       <div class="timer-grid" id="timer-grid"></div>
     </div>
     <div class="subpage" id="sub-hidra">
@@ -577,7 +577,7 @@ select.fi option{background:var(--s2)}
           <div class="fg"><label class="fl">Yang/cofre</label><input class="fi" type="text" id="h-yang" placeholder="Ex: 32kk, 1w, 150000"></div>
           <div class="fg"><label class="fl">Notas</label><input class="fi" type="text" id="h-not" placeholder="Opcional"></div>
         </div>
-        <button class="btn-action" onclick="addHidra()">Registar run</button>
+        <button class="btn-action" onclick="addHidra()" data-i18n="hidra_add">Registar run</button>
       </div>
       <div class="stats-g" style="margin-bottom:8px">
         <div class="stat-b"><div class="stat-l">Runs</div><div class="stat-v" id="h-r">0</div></div>
@@ -588,7 +588,7 @@ select.fi option{background:var(--s2)}
       <div class="lb-card">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--b1)">
           <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Histórico</span>
-          <button class="btn-danger" style="font-size:10px;padding:4px 10px" onclick="clearHidra()">Limpar</button>
+          <button class="btn-danger" style="font-size:10px;padding:4px 10px" onclick="clearHidra()" data-i18n="hidra_clear">Limpar</button>
         </div>
         <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px" id="h-table">
           <thead><tr>
@@ -618,7 +618,7 @@ select.fi option{background:var(--s2)}
     </div>
     <div id="disf-in" style="display:none">
       <div class="add-card">
-        <h3>Adicionar disfarce</h3>
+        <h3 data-i18n="add_disguise">Adicionar disfarce</h3>
         <div class="form-row" style="align-items:flex-start">
           <!-- Tipo + imagem -->
           <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
@@ -635,11 +635,11 @@ select.fi option{background:var(--s2)}
             </div>
             <input type="file" id="dg-custom-img" accept="image/*" style="display:none" onchange="setDgCustomImg(this)">
           </div>
-          <div class="fg"><label class="fl">Nome</label><input class="fi" type="text" id="dg-n" placeholder="Ex: Guerreiro das Sombras"></div>
+          <div class="fg"><label class="fl">Nome</label><input class="fi" type="text" id="dg-n" placeholder="Ex: Guerreiro das Sombras" data-i18n-ph="dg_name_ph"></div>
           <div class="fg" style="max-width:65px"><label class="fl">Dias</label><input class="fi" type="number" id="dg-dd" value="0" min="0" placeholder="0"></div>
           <div class="fg" style="max-width:65px"><label class="fl">Horas</label><input class="fi" type="number" id="dg-hh" value="1" min="0" max="23" placeholder="1"></div>
           <div class="fg" style="max-width:65px"><label class="fl">Minutos</label><input class="fi" type="number" id="dg-mm" value="0" min="0" max="59" placeholder="0"></div>
-          <button class="btn-teal" onclick="addDisguise()" style="align-self:flex-end">Adicionar</button>
+          <button class="btn-teal" onclick="addDisguise()" style="align-self:flex-end" data-i18n="dg_add_btn">Adicionar</button>
         </div>
       </div>
       <div id="dg-empty" style="display:none;text-align:center;padding:32px;color:var(--muted);font-size:13px">Sem disfarces ativos.</div>
@@ -914,12 +914,12 @@ select.fi option{background:var(--s2)}
 <div class="crit-ov" id="winner-popup-ov" style="z-index:999">
   <div class="crit-pop" style="background:linear-gradient(145deg,#1a1000,#2a1f00);border-color:var(--orange)">
     <div style="font-size:40px;margin-bottom:8px;animation:shake .5s ease-in-out infinite alternate">🏆</div>
-    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);margin-bottom:6px">Vencedor do Giveaway</div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);margin-bottom:6px" data-i18n="winner_label">🏆 Vencedor do Giveaway</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:4px" id="wp-prize">—</div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.04em;color:var(--orange);line-height:1;margin:8px 0;animation:tblink 1s ease-in-out infinite" id="wp-winner">—</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Parabéns! Contacta o streamer no Discord.</div>
     <div style="display:flex;gap:8px;justify-content:center">
-      <button onclick="closeWinnerPopup()" style="all:unset;box-sizing:border-box;font-size:13px;font-weight:600;padding:11px 28px;border-radius:100px;background:var(--orange);color:#1a0a00;cursor:pointer">Fechar</button>
+      <button onclick="closeWinnerPopup()" style="all:unset;box-sizing:border-box;font-size:13px;font-weight:600;padding:11px 28px;border-radius:100px;background:var(--orange);color:#1a0a00;cursor:pointer" data-i18n="close_btn">Fechar</button>
     </div>
   </div>
 </div>
@@ -946,7 +946,7 @@ select.fi option{background:var(--s2)}
 <div class="crit-ov" id="crit-ov">
   <div class="crit-pop">
     <div class="crit-icon">⚠</div>
-    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#f87171;margin-bottom:4px">Disfarce crítico</div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#f87171;margin-bottom:4px" data-i18n="crit_title">Disfarce crítico</div>
     <div class="crit-name" id="cp-name">—</div>
     <div class="crit-time" id="cp-time">00:00:00</div>
     <div class="crit-sub" id="cp-sub">O teu disfarce está quase a expirar. Renova agora.</div>
@@ -1076,6 +1076,8 @@ function goPage(id,el){
   sessionStorage.setItem('currentPage', id);
   const map={perfil:loadPerfil,loja:loadLoja,timers:loadTimers,disfarces:loadDisfarces,giveaway:loadGiveaway,admin:loadAdmin};
   if(map[id])map[id]();
+  // Apply current language to new page
+  setTimeout(()=>applyLang(),50);
 }
 
 // ── AUTH ──
@@ -1531,7 +1533,7 @@ function renderDisguises(){
   grid.innerHTML=disguises.map(d=>{
     const rem=getRem(d),zone=getZone(rem,d.total_secs),pct=Math.max(0,rem/d.total_secs*100);
     const bc=zone==='ok'?'var(--green)':zone==='warn'?'var(--orange)':'var(--red)';
-    const labels={ok:'Em segurança',warn:'Atenção',crit:'Crítico',exp:'Expirado'};
+    const labels={ok:t('safe'),warn:t('warn_status'),crit:t('crit_status'),exp:t('exp_status')};
     const dgImg = d.image_url ? `<img src="${d.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:6px">` : `<i class="ti ti-spy" style="font-size:20px;color:var(--muted)"></i>`;
     return`<div class="dg-card ${zone==='warn'?'warn':zone==='crit'?'crit':''}" id="dc-${d.id}">
       <button class="dg-del" onclick="delDisguise('${d.id}')"><i class="ti ti-x"></i></button>
@@ -1546,8 +1548,8 @@ function renderDisguises(){
       <div class="dg-time ${zone}" id="dt-${d.id}">${fmtT(rem)}</div>
       <div class="dg-bar-wrap"><div class="dg-bar-fill" id="db-${d.id}" style="width:${pct.toFixed(1)}%;background:${bc}"></div></div>
       <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn-sm-renew" onclick="renewDisguise('${d.id}')"><i class="ti ti-refresh" style="font-size:11px;vertical-align:-1px"></i> Renovar</button>
-        <button class="btn-sm-renew" onclick="editDgTime('${d.id}')" style="color:var(--accent);border-color:rgba(91,156,246,.2)"><i class="ti ti-clock-edit" style="font-size:11px;vertical-align:-1px"></i> Editar tempo</button>
+        <button class="btn-sm-renew" onclick="renewDisguise('${d.id}')"><i class="ti ti-refresh" style="font-size:11px;vertical-align:-1px"></i> ${t('renew_btn')}</button>
+        <button class="btn-sm-renew" onclick="editDgTime('${d.id}')" style="color:var(--accent);border-color:rgba(91,156,246,.2)"><i class="ti ti-clock-edit" style="font-size:11px;vertical-align:-1px"></i> ${t('edit_time_btn')}</button>
       </div>
     </div>`;
   }).join('');
@@ -2310,7 +2312,7 @@ const LANGS = {
   },
   en: {
     flag:'🇬🇧', code:'EN',
-    nav_home:'Home', nav_profile:'Profile', nav_shop:'Shop', nav_timers:'Timers', nav_disguises:'Disguises', nav_giveaway:'Giveaway', nav_admin:'Admin',
+    nav_home:'Home', nav_profile:'Profile', nav_shop:'Shop', nav_timers:'Timers', nav_disguises:'Costumes', nav_giveaway:'Giveaway', nav_admin:'Admin',
     login_btn:'Login with Twitch', logout_btn:'Logout',
     hero_badge:'Live now · Streamer',
     hero_sub:'Stream. Gaming. Adrenaline.<br>Your next big play starts here.',
@@ -2343,10 +2345,10 @@ const LANGS = {
     timers_title:'Timers', timers_sub:'Respawn timers and run tracker',
     new_timer:'New timer', tab_timers:'Timers', tab_hidra:'Hidra Tracker',
     timer_info:'Timers keep counting even with the page closed.',
-    disguises_title:'Disguises', disguises_sub:'Monitor your in-game disguise duration',
+    disguises_title:'Costumes', disguises_sub:'Monitor your in-game costume duration',
     disguises_login:'Sign in to use the tracker',
-    add_disguise:'Add disguise',
-    dg_type_traje:'Outfit', dg_type_arma:'Weapon', dg_type_penteado:'Hairstyle', dg_type_outro:'Other',
+    add_disguise:'Add costume',
+    dg_type_traje:'Costume', dg_type_arma:'Weapon', dg_type_penteado:'Hairstyle', dg_type_outro:'Other',
     dg_name_ph:'Ex: Shadow Warrior',
     dg_add_btn:'Add',
     renew_btn:'Renew', edit_time_btn:'Edit time',
@@ -2359,8 +2361,8 @@ const LANGS = {
     joined_label:'Joined', your_tickets:'Your tickets:',
     winner_label:'🏆 Giveaway Winner',
     gw_history:'Giveaway history', no_history:'No history yet.',
-    stop_disguise:'Stop disguise', close_btn:'Close',
-    crit_title:'Critical disguise',
+    stop_disguise:'Stop costume', close_btn:'Close',
+    crit_title:'Critical costume',
     admin_title:'Admin', admin_sub:'Platform management dashboard',
     tab_coupons:'Coupons', tab_shop:'Shop', tab_redeems:'Redemptions', tab_giveaway:'Giveaway', tab_points:'Points', tab_users:'Users',
     brave_title:'You are using Brave Browser',
@@ -2407,7 +2409,7 @@ const LANGS = {
     disguises_title:'Verkleidungen', disguises_sub:'Verfolge die Dauer deiner Spielverkleidungen',
     disguises_login:'Melde dich an, um den Tracker zu verwenden',
     add_disguise:'Verkleidung hinzufügen',
-    dg_type_traje:'Outfit', dg_type_arma:'Waffe', dg_type_penteado:'Frisur', dg_type_outro:'Andere',
+    dg_type_traje:'Costume', dg_type_arma:'Waffe', dg_type_penteado:'Frisur', dg_type_outro:'Andere',
     dg_name_ph:'z.B.: Schattenkrieger',
     dg_add_btn:'Hinzufügen',
     renew_btn:'Erneuern', edit_time_btn:'Zeit bearbeiten',
@@ -2534,13 +2536,75 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.dataset.i18n;
     if(el.tagName==='INPUT' && el.placeholder !== undefined) el.placeholder = t(key);
-    else if(el.tagName==='INPUT' || el.tagName==='BUTTON') el.textContent = t(key);
+    else if(el.tagName==='BUTTON') el.textContent = t(key);
     else el.innerHTML = t(key);
   });
+  // Placeholder i18n
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    el.placeholder = t(el.dataset.i18nPh);
+  });
+  // Hidra labels
+  const hRunsEl=document.querySelector('[data-i18n="hidra_runs"]');
+  const hCofEl=document.querySelector('[data-i18n="hidra_cofres"]');
+  const hYEl=document.querySelector('[data-i18n="hidra_yang"]');
+  // Update all static text elements with data-i18n
+  // Nav right buttons
+  updateNavLang();
   // Re-render dynamic content if on active page
   const activePage = sessionStorage.getItem('currentPage') || 'home';
   if(activePage==='perfil' && currentUser) loadPerfil();
   if(activePage==='loja' && currentUser) loadLoja();
+  if(activePage==='timers') updateTimersLang();
+  if(activePage==='disfarces') updateDisguisesLang();
+}
+
+function updateNavLang(){
+  // Update nav right area login/logout button text
+  const navRight = document.getElementById('nav-right');
+  if(navRight){
+    const loginBtn = navRight.querySelector('.btn-login span[data-i18n]');
+    if(loginBtn) loginBtn.textContent = t('login_btn');
+  }
+}
+
+function updateTimersLang(){
+  // Timer info bar
+  const infoBar = document.querySelector('#sub-timers .info-bar');
+  if(infoBar){
+    const icon = infoBar.querySelector('i');
+    infoBar.innerHTML = '';
+    if(icon) infoBar.appendChild(icon);
+    infoBar.appendChild(document.createTextNode(t('timer_info')));
+  }
+  // New timer button
+  const newTimerBtn = document.getElementById('btn-new-timer');
+  if(newTimerBtn) newTimerBtn.innerHTML = '<i class="ti ti-plus"></i>' + t('new_timer');
+  // Sub tabs
+  const stabTimers = document.getElementById('stab-timers');
+  if(stabTimers) stabTimers.textContent = t('tab_timers');
+  // Render timers to update button texts
+  renderTimers();
+}
+
+function updateDisguisesLang(){
+  // Add disguise section title
+  const addCard = document.querySelector('#p-disfarces .add-card h3');
+  if(addCard) addCard.textContent = t('add_disguise');
+  // Type options
+  const typeSelect = document.getElementById('dg-type');
+  if(typeSelect){
+    const opts = typeSelect.querySelectorAll('option');
+    const keys = ['dg_type_traje','dg_type_arma','dg_type_penteado','dg_type_outro'];
+    opts.forEach((o,i)=>{ if(keys[i]) o.textContent = t(keys[i]); });
+  }
+  // Name placeholder
+  const nameInput = document.getElementById('dg-n');
+  if(nameInput) nameInput.placeholder = t('dg_name_ph');
+  // Add button
+  const addBtn = document.querySelector('#p-disfarces .btn-teal');
+  if(addBtn) addBtn.textContent = t('dg_add_btn');
+  // Re-render disguises to update button texts
+  renderDisguises();
 }
 
 function initLang(){
