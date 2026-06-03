@@ -444,8 +444,8 @@ select.fi option{background:var(--s2)}
               <i class="ti ti-brand-discord" style="color:#a5b4fc;font-size:16px"></i>
             </div>
             <div>
-              <div style="font-size:13px;font-weight:600;color:#a5b4fc" id="discord-username">—</div>
-              <div style="font-size:11px;color:var(--green)">✓ Conta ligada</div>
+              <div style="font-size:13px;font-weight:600;color:#a5b4fc" id="discord-username" data-i18n="dc_connected">—</div>
+              <div style="font-size:11px;color:var(--green)" data-i18n="dc_linked">✓ Conta ligada</div>
             </div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
@@ -513,7 +513,7 @@ select.fi option{background:var(--s2)}
         <div>
           <div class="prf-name" id="prf-name">—</div>
           <div class="prf-role" id="prf-role">Viewer</div>
-          <div class="rank-chip" id="prf-rank"><i class="ti ti-medal" style="font-size:11px"></i> Novo</div>
+          <div class="rank-chip" id="prf-rank"><i class="ti ti-medal" style="font-size:11px"></i> <span id="prf-rank-text">Novo</span></div>
         </div>
         <div class="pts-big">
           <div class="pts-big-v" id="prf-pts">0</div>
@@ -545,7 +545,7 @@ select.fi option{background:var(--s2)}
     </div>
     <div id="loja-in" style="display:none">
       <div class="shop-notice"><i class="ti ti-info-circle" style="flex-shrink:0"></i><span data-i18n="shop_notice">Após resgatar, abre um ticket no Discord para receberes o prémio.</span></div>
-      <div class="shop-pts"><span data-i18n="your_points">Os teus pontos:</span> <strong id="shop-pts-val">0</strong></div>
+      <div class="shop-pts"><span data-i18n="shop_your_pts">Os teus pontos:</span> <strong id="shop-pts-val">0</strong></div>
       <div class="shop-grid" id="shop-grid"></div>
     </div>
   </div>
@@ -1157,7 +1157,7 @@ async function loadPerfil(){
   try{
     const pts=await req('GET','/points/me');
     document.getElementById('prf-pts').textContent=pts.points.toLocaleString();
-    document.getElementById('prf-rank').innerHTML=`<i class="ti ti-medal" style="font-size:11px"></i> ${getRank(pts.points)}`;
+    const rankEl=document.getElementById('prf-rank-text');if(rankEl)rankEl.textContent=getRank(pts.points);
     const lb=await req('GET','/points/leaderboard');
     renderLeaderboard(lb,pts.rank);
   }catch(e){document.getElementById('prf-pts').textContent='—';}
@@ -1180,8 +1180,7 @@ async function loadDiscordStatus(){
     if(d.connected){
       document.getElementById('discord-not-connected').style.display='none';
       document.getElementById('discord-connected').style.display='block';
-      // Fetch discord username from bot if possible
-      document.getElementById('discord-username').textContent='Discord ligado ✓';
+      document.getElementById('discord-username').textContent=t('dc_connected');
     } else {
       document.getElementById('discord-not-connected').style.display='block';
       document.getElementById('discord-connected').style.display='none';
@@ -1245,7 +1244,7 @@ async function loadLoja(){
     document.getElementById('shop-grid').innerHTML=items.map(item=>{
       const ca=(pts.points||0)>=item.price,oos=item.stock<=0;
       const img=item.image_url?`<img src="${item.image_url}" alt="${item.name}">`:`<i class="ti ti-package shop-img-ph"></i>`;
-      return`<div class="shop-card ${oos?'oos':''}"><div class="shop-img">${img}</div><div class="shop-body"><div class="shop-name">${item.name}</div><div class="shop-desc">${item.description||''}</div><div class="shop-footer"><div><div class="shop-price">${item.price.toLocaleString()} pts</div><div class="shop-stock ${item.stock<=1?'low':''} ${oos?'out':''}">${oos?'Esgotado':'Stock: '+item.stock}</div></div><button class="btn-buy" onclick="initBuy('${item.id}','${item.name}',${item.price},${item.stock})" ${oos||!ca?'disabled':''}>${oos?'Esgotado':ca?'Resgatar':'Sem pts'}</button></div></div></div>`;
+      return`<div class="shop-card ${oos?'oos':''}"><div class="shop-img">${img}</div><div class="shop-body"><div class="shop-name">${item.name}</div><div class="shop-desc">${item.description||''}</div><div class="shop-footer"><div><div class="shop-price">${item.price.toLocaleString()} pts</div><div class="shop-stock ${item.stock<=1?'low':''} ${oos?'out':''}">${oos?t('shop_out_stock'):t('shop_stock')+' '+item.stock}</div></div><button class="btn-buy" onclick="initBuy('${item.id}','${item.name}',${item.price},${item.stock})" ${oos||!ca?'disabled':''}>${oos?t('shop_out_stock'):ca?t('shop_redeem_btn'):t('shop_no_pts')}</button></div></div></div>`;
     }).join('');
   }catch(e){toast('Erro ao carregar loja','err');}
 }
@@ -2349,6 +2348,14 @@ const LANGS = {
     dg_total_suffix:'total',
     dg_popup_sub:'O teu disfarce está quase a expirar. Renova agora.',
     dg_popup_label:'Disfarce crítico',
+    dc_connected:'Discord ligado',
+    dc_linked:'✓ Conta ligada',
+    shop_redeem_btn:'Resgatar',
+    shop_no_pts:'Sem pts',
+    shop_out_stock:'Esgotado',
+    shop_stock:'Stock:',
+    shop_your_pts:'Os teus pontos:',
+    hidra_reg_title:'Registar run',
     hidra_section:'Registar run',
     hidra_col_cofres:'Cofres', hidra_col_yang:'Yang/Cofre', hidra_col_total:'Total', hidra_col_notes:'Notas', hidra_col_date:'Data',
     hidra_notes_ph:'Opcional', hidra_empty:'Sem runs ainda.',
@@ -2727,21 +2734,18 @@ function updateNavLang(){
 
 function updateTimersLang(){
   // Timer info bar
-  const infoBar = document.querySelector('#sub-timers .info-bar');
-  if(infoBar){
-    const icon = infoBar.querySelector('i');
-    infoBar.innerHTML = '';
-    if(icon) infoBar.appendChild(icon);
-    infoBar.appendChild(document.createTextNode(t('timer_info')));
-  }
-  // New timer button
-  const newTimerBtn = document.getElementById('btn-new-timer');
-  if(newTimerBtn) newTimerBtn.innerHTML = '<i class="ti ti-plus"></i>' + t('new_timer');
+  const infoBar = document.querySelector('#sub-timers .info-bar span[data-i18n]');
+  if(infoBar) infoBar.textContent = t('timer_info');
+  // New timer button span
+  const newTimerSpan = document.querySelector('#btn-new-timer span[data-i18n]');
+  if(newTimerSpan) newTimerSpan.textContent = t('new_timer');
   // Sub tabs
   const stabTimers = document.getElementById('stab-timers');
   if(stabTimers) stabTimers.textContent = t('tab_timers');
   // Render timers to update button texts
   renderTimers();
+  // Re-render hidra if active
+  if(document.getElementById('sub-hidra').classList.contains('active')) renderHidra();
 }
 
 function updateDisguisesLang(){
