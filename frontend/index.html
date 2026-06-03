@@ -296,6 +296,9 @@ select.fi option{background:var(--s2)}
 .crit-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 
 /* TOAST */
+.lang-opt{all:unset;box-sizing:border-box;display:block;width:100%;padding:9px 14px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:background .1s}
+.lang-opt:hover{background:rgba(255,255,255,.05)}
+.lang-opt.active{color:var(--accent);font-weight:700}
 .toast-wrap{position:fixed;top:64px;right:20px;z-index:300;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .toast{background:var(--s1);border:1px solid var(--b2);border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;transform:translateX(110%);transition:transform .25s;pointer-events:all;max-width:260px}
 .toast.show{transform:translateX(0)}
@@ -340,8 +343,20 @@ select.fi option{background:var(--s2)}
   </div>
   <div class="nav-right" id="nav-right">
     <button class="btn-login" onclick="showLogin()">
-      <i class="ti ti-brand-twitch"></i>Entrar com Twitch
+      <i class="ti ti-brand-twitch"></i><span data-i18n="login_btn">Entrar com Twitch</span>
     </button>
+  </div>
+  <!-- Language selector -->
+  <div style="position:relative;margin-left:10px;flex-shrink:0" id="lang-selector">
+    <button onclick="toggleLangMenu()" style="all:unset;box-sizing:border-box;display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--b2);cursor:pointer;font-size:12px;font-weight:600;color:var(--text)" id="lang-btn">
+      <span id="lang-flag">🇵🇹</span><span id="lang-code">PT</span><i class="ti ti-chevron-down" style="font-size:10px;color:var(--muted)"></i>
+    </button>
+    <div id="lang-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--s1);border:1px solid var(--b2);border-radius:8px;overflow:hidden;min-width:120px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:200">
+      <button onclick="setLang('pt')" class="lang-opt" data-lang="pt">🇵🇹 Português</button>
+      <button onclick="setLang('en')" class="lang-opt" data-lang="en">🇬🇧 English</button>
+      <button onclick="setLang('de')" class="lang-opt" data-lang="de">🇩🇪 Deutsch</button>
+      <button onclick="setLang('tr')" class="lang-opt" data-lang="tr">🇹🇷 Türkçe</button>
+    </div>
   </div>
 </nav>
 
@@ -353,18 +368,18 @@ select.fi option{background:var(--s2)}
       <div class="hero-av"><img src="data:image/jpeg;base64,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" alt="inuhzao"></div>
       <div class="live-dot-abs" id="hero-dot"></div>
     </div>
-    <div class="hero-badge" id="hero-badge"><span class="badge-dot"></span>Live agora · Streamer</div>
+    <div class="hero-badge" id="hero-badge"><span class="badge-dot"></span><span data-i18n="hero_badge">Live agora · Streamer</span></div>
     <div class="hero-name">INUH<span>ZAO</span></div>
-    <p class="hero-sub">Stream. Jogo. Adrenalina.<br>A tua próxima grande jogada começa aqui.</p>
+    <p class="hero-sub" data-i18n="hero_sub">Stream. Jogo. Adrenalina.<br>A tua próxima grande jogada começa aqui.</p>
     <div class="hero-btns">
       <a class="btn-watch" href="https://twitch.tv/inuhzao" target="_blank" rel="noopener">
-        <i class="ti ti-brand-twitch"></i>Ver na Twitch
+        <i class="ti ti-brand-twitch"></i><span data-i18n="hero_watch">Ver na Twitch</span>
       </a>
 
     </div>
   </div>
   <div class="stream-section">
-    <div class="sec-label">Stream ao vivo</div>
+    <div class="sec-label" data-i18n="stream_label">Stream ao vivo</div>
     <div class="stream-grid">
       <div class="stream-wrap">
         <div id="stream-live" style="position:absolute;inset:0">
@@ -373,14 +388,14 @@ select.fi option{background:var(--s2)}
         <div class="stream-offline" id="stream-offline" style="display:none">
           <div class="off-av"><img src="data:image/jpeg;base64,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" alt="off"></div>
           <div class="off-name">INUHZAO</div>
-          <div class="off-sub">Offline de momento</div>
+          <div class="off-sub" data-i18n="offline_sub">Offline de momento</div>
           <button class="btn-off" onclick="window.open('https://twitch.tv/inuhzao','_blank')">
             <i class="ti ti-brand-twitch"></i>Seguir na Twitch
           </button>
         </div>
       </div>
       <div class="sidebar-card">
-        <div class="sidebar-title">Segue-nos</div>
+        <div class="sidebar-title" data-i18n="follow_us">Segue-nos</div>
         <div class="soc-link" onclick="window.open('https://twitch.tv/inuhzao','_blank')">
           <div class="soc-ico tw"><i class="ti ti-brand-twitch" style="color:#9146ff"></i></div>
           <div><span class="soc-name">Twitch</span><span class="soc-handle">twitch.tv/inuhzao</span></div>
@@ -402,8 +417,8 @@ select.fi option{background:var(--s2)}
 <!-- PERFIL -->
 <div class="page" id="p-perfil">
   <div class="page-wrap">
-    <div class="page-title">Perfil</div>
-    <div class="page-sub">Os teus pontos, rank e histórico</div>
+    <div class="page-title" data-i18n="profile_title">Perfil</div>
+    <div class="page-sub" data-i18n="profile_sub">Os teus pontos, rank e histórico</div>
     <div id="perfil-out" class="empty">
       <i class="ti ti-lock"></i>
       <p>Inicia sessão para aceder ao teu perfil</p>
@@ -521,8 +536,8 @@ select.fi option{background:var(--s2)}
 <!-- LOJA -->
 <div class="page" id="p-loja">
   <div class="page-wrap">
-    <div class="page-title">Loja</div>
-    <div class="page-sub">Troca os teus pontos por recompensas exclusivas</div>
+    <div class="page-title" data-i18n="shop_title">Loja</div>
+    <div class="page-sub" data-i18n="shop_sub">Troca os teus pontos por recompensas exclusivas</div>
     <div id="loja-out" class="empty">
       <i class="ti ti-lock"></i>
       <p>Inicia sessão para aceder à loja</p>
@@ -541,13 +556,13 @@ select.fi option{background:var(--s2)}
   <div class="page-wrap">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
       <div>
-        <div class="page-title">Timers</div>
-        <div class="page-sub">Timers de respawn e tracker de runs</div>
+        <div class="page-title" data-i18n="timers_title">Timers</div>
+        <div class="page-sub" data-i18n="timers_sub">Timers de respawn e tracker de runs</div>
       </div>
       <button class="btn-action" id="btn-new-timer" onclick="showTimerModal()"><i class="ti ti-plus"></i>Novo timer</button>
     </div>
     <div class="sub-tabs">
-      <button class="sub-tab active" onclick="showSub('timers',this)" id="stab-timers">Timers</button>
+      <button class="sub-tab active" onclick="showSub('timers',this)" id="stab-timers" data-i18n="tab_timers">Timers</button>
       <button class="sub-tab" onclick="showSub('hidra',this)" id="stab-hidra">Hidra Tracker</button>
     </div>
     <div class="subpage active" id="sub-timers">
@@ -594,8 +609,8 @@ select.fi option{background:var(--s2)}
 <!-- DISFARCES -->
 <div class="page" id="p-disfarces">
   <div class="page-wrap">
-    <div class="page-title">Disfarces</div>
-    <div class="page-sub">Monitoriza a duração dos teus disfarces em jogo</div>
+    <div class="page-title" data-i18n="disguises_title">Disfarces</div>
+    <div class="page-sub" data-i18n="disguises_sub">Monitoriza a duração dos teus disfarces em jogo</div>
     <div id="disf-out" class="empty">
       <i class="ti ti-lock"></i>
       <p>Inicia sessão para usar o tracker</p>
@@ -636,12 +651,12 @@ select.fi option{background:var(--s2)}
 <!-- GIVEAWAY -->
 <div class="page" id="p-giveaway">
   <div class="page-wrap">
-    <div class="page-title">Giveaway</div>
-    <div class="page-sub">Participa nos sorteios da comunidade</div>
+    <div class="page-title" data-i18n="giveaway_title">Giveaway</div>
+    <div class="page-sub" data-i18n="giveaway_sub">Participa nos sorteios da comunidade</div>
     <div id="gw-none" class="empty">
       <i class="ti ti-gift"></i>
-      <p>Nenhum giveaway ativo</p>
-      <span>Fica atento ao stream para os próximos sorteios.</span>
+      <p data-i18n="no_giveaway">Nenhum giveaway ativo</p>
+      <span data-i18n="no_giveaway_sub">Fica atento ao stream para os próximos sorteios.</span>
     </div>
     <div id="gw-active" style="display:none">
       <div class="gw-box">
@@ -695,8 +710,8 @@ select.fi option{background:var(--s2)}
 <!-- ADMIN -->
 <div class="page" id="p-admin">
   <div class="page-wrap">
-    <div class="page-title">Admin</div>
-    <div class="page-sub">Dashboard de gestão da plataforma</div>
+    <div class="page-title" data-i18n="admin_title">Admin</div>
+    <div class="page-sub" data-i18n="admin_sub">Dashboard de gestão da plataforma</div>
     <div class="admin-tabs">
       <button class="at active" onclick="aTab('cupoes',this)">Cupões</button>
       <button class="at" onclick="aTab('loja',this)">Loja</button>
@@ -852,7 +867,7 @@ select.fi option{background:var(--s2)}
     </div>
     <!-- Aviso Brave -->
     <div id="brave-warning" style="display:none;background:rgba(251,130,35,.08);border:1px solid rgba(251,130,35,.25);border-radius:7px;padding:10px 14px;font-size:11px;color:#fdba74;margin-bottom:12px;line-height:1.6">
-      <div style="font-weight:700;margin-bottom:4px"><i class="ti ti-shield-exclamation" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>Estás a usar o Brave Browser</div>
+      <div style="font-weight:700;margin-bottom:4px"><i class="ti ti-shield-exclamation" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i><span data-i18n="brave_title">Estás a usar o Brave Browser</span></div>
       Para fazer login, desactiva temporariamente os <strong>Escudos do Brave</strong> neste site:<br>
       Clica no ícone do leão 🦁 na barra de endereço → <strong>"Escudos desactivados"</strong> → recarrega a página.
     </div>
@@ -2230,6 +2245,309 @@ function resetTheme(){
   toast('Cores repostas!');
 }
 
+// ── TRANSLATIONS ──
+const LANGS = {
+  pt: {
+    flag:'🇵🇹', code:'PT',
+    nav_home:'Início', nav_profile:'Perfil', nav_shop:'Loja', nav_timers:'Timers', nav_disguises:'Disfarces', nav_giveaway:'Giveaway', nav_admin:'Admin',
+    login_btn:'Entrar com Twitch', logout_btn:'Sair',
+    hero_badge:'Live agora · Streamer',
+    hero_sub:'Stream. Jogo. Adrenalina.<br>A tua próxima grande jogada começa aqui.',
+    hero_watch:'Ver na Twitch',
+    stream_label:'Stream ao vivo',
+    follow_us:'Segue-nos',
+    offline_sub:'Offline de momento',
+    follow_twitch:'Seguir na Twitch',
+    profile_title:'Perfil', profile_sub:'Os teus pontos, rank e histórico',
+    profile_login:'Inicia sessão para aceder ao teu perfil',
+    login_with_twitch:'Entrar com Twitch',
+    discord_title:'Notificações Discord',
+    discord_sub:'Liga a tua conta Discord para receberes DMs quando os disfarces estão a expirar.',
+    discord_connect:'Ligar conta Discord',
+    discord_test:'Testar DM', discord_disconnect:'Desligar',
+    coupon_title:'Resgatar cupão',
+    coupon_sub:'Tens um código? Introduz abaixo para receberes os pontos.',
+    coupon_btn:'Resgatar', coupon_ph:'INUH-XXXX-XXXX',
+    pts_label:'pontos', rank_label:'Novo',
+    leaderboard:'Leaderboard',
+    shop_title:'Loja', shop_sub:'Troca os teus pontos por recompensas exclusivas',
+    shop_login:'Inicia sessão para aceder à loja',
+    shop_notice:'Após resgatar, abre um ticket no Discord para receberes o prémio.',
+    your_points:'Os teus pontos:',
+    out_of_stock:'Esgotado', stock_label:'Stock:',
+    redeem_btn:'Resgatar', no_pts:'Sem pts',
+    confirm_redeem:'Confirmar resgate',
+    confirm_btn:'Confirmar', cancel_btn:'Cancelar',
+    discord_notice:'Após confirmar, abre um ticket no Discord para receberes o prémio.',
+    timers_title:'Timers', timers_sub:'Timers de respawn e tracker de runs',
+    new_timer:'Novo timer', tab_timers:'Timers', tab_hidra:'Hidra Tracker',
+    timer_info:'Os timers continuam a contar mesmo com a página fechada.',
+    disguises_title:'Disfarces', disguises_sub:'Monitoriza a duração dos teus disfarces em jogo',
+    disguises_login:'Inicia sessão para usar o tracker',
+    add_disguise:'Adicionar disfarce',
+    dg_type_traje:'Traje', dg_type_arma:'Arma', dg_type_penteado:'Penteado', dg_type_outro:'Outro',
+    dg_name_ph:'Ex: Guerreiro das Sombras',
+    dg_add_btn:'Adicionar',
+    renew_btn:'Renovar', edit_time_btn:'Editar tempo',
+    safe:'Em segurança', warn_status:'Atenção', crit_status:'Crítico', exp_status:'Expirado',
+    giveaway_title:'Giveaway', giveaway_sub:'Participa nos sorteios da comunidade',
+    no_giveaway:'Nenhum giveaway ativo', no_giveaway_sub:'Fica atento ao stream para os próximos sorteios.',
+    giveaway_active:'Giveaway ativo',
+    participate_btn:'Participar', tickets_label:'tickets',
+    cost_label:'Custo:', you_have:'Tens',
+    joined_label:'Inscrito', your_tickets:'Os teus tickets:',
+    winner_label:'🏆 Vencedor do Giveaway',
+    gw_history:'Histórico de giveaways', no_history:'Sem histórico ainda.',
+    stop_disguise:'Parar disfarce', close_btn:'Fechar',
+    crit_title:'Disfarce crítico',
+    admin_title:'Admin', admin_sub:'Dashboard de gestão da plataforma',
+    tab_coupons:'Cupões', tab_shop:'Loja', tab_redeems:'Resgates', tab_giveaway:'Giveaway', tab_points:'Pontos', tab_users:'Utilizadores',
+    brave_title:'Estás a usar o Brave Browser',
+    brave_msg:'Para fazer login, desactiva temporariamente os Escudos do Brave neste site:<br>Clica no ícone do leão 🦁 na barra de endereço → "Escudos desactivados" → recarrega a página.',
+    hidra_runs:'Runs', hidra_cofres:'Cofres', hidra_yang:'Yang total',
+    hidra_add:'Registar run', hidra_clear:'Limpar',
+    hidra_history:'Histórico',
+  },
+  en: {
+    flag:'🇬🇧', code:'EN',
+    nav_home:'Home', nav_profile:'Profile', nav_shop:'Shop', nav_timers:'Timers', nav_disguises:'Disguises', nav_giveaway:'Giveaway', nav_admin:'Admin',
+    login_btn:'Login with Twitch', logout_btn:'Logout',
+    hero_badge:'Live now · Streamer',
+    hero_sub:'Stream. Gaming. Adrenaline.<br>Your next big play starts here.',
+    hero_watch:'Watch on Twitch',
+    stream_label:'Live Stream',
+    follow_us:'Follow us',
+    offline_sub:'Offline right now',
+    follow_twitch:'Follow on Twitch',
+    profile_title:'Profile', profile_sub:'Your points, rank and history',
+    profile_login:'Sign in to access your profile',
+    login_with_twitch:'Login with Twitch',
+    discord_title:'Discord Notifications',
+    discord_sub:'Link your Discord account to receive DMs when your disguises are expiring.',
+    discord_connect:'Link Discord account',
+    discord_test:'Test DM', discord_disconnect:'Disconnect',
+    coupon_title:'Redeem coupon',
+    coupon_sub:'Have a code? Enter below to receive your points.',
+    coupon_btn:'Redeem', coupon_ph:'INUH-XXXX-XXXX',
+    pts_label:'points', rank_label:'New',
+    leaderboard:'Leaderboard',
+    shop_title:'Shop', shop_sub:'Exchange your points for exclusive rewards',
+    shop_login:'Sign in to access the shop',
+    shop_notice:'After redeeming, open a ticket on Discord to receive your reward.',
+    your_points:'Your points:',
+    out_of_stock:'Out of stock', stock_label:'Stock:',
+    redeem_btn:'Redeem', no_pts:'No pts',
+    confirm_redeem:'Confirm redemption',
+    confirm_btn:'Confirm', cancel_btn:'Cancel',
+    discord_notice:'After confirming, open a ticket on Discord to receive your reward.',
+    timers_title:'Timers', timers_sub:'Respawn timers and run tracker',
+    new_timer:'New timer', tab_timers:'Timers', tab_hidra:'Hidra Tracker',
+    timer_info:'Timers keep counting even with the page closed.',
+    disguises_title:'Disguises', disguises_sub:'Monitor your in-game disguise duration',
+    disguises_login:'Sign in to use the tracker',
+    add_disguise:'Add disguise',
+    dg_type_traje:'Outfit', dg_type_arma:'Weapon', dg_type_penteado:'Hairstyle', dg_type_outro:'Other',
+    dg_name_ph:'Ex: Shadow Warrior',
+    dg_add_btn:'Add',
+    renew_btn:'Renew', edit_time_btn:'Edit time',
+    safe:'Safe', warn_status:'Warning', crit_status:'Critical', exp_status:'Expired',
+    giveaway_title:'Giveaway', giveaway_sub:'Join the community giveaways',
+    no_giveaway:'No active giveaway', no_giveaway_sub:'Stay tuned to the stream for upcoming giveaways.',
+    giveaway_active:'Active giveaway',
+    participate_btn:'Join', tickets_label:'tickets',
+    cost_label:'Cost:', you_have:'You have',
+    joined_label:'Joined', your_tickets:'Your tickets:',
+    winner_label:'🏆 Giveaway Winner',
+    gw_history:'Giveaway history', no_history:'No history yet.',
+    stop_disguise:'Stop disguise', close_btn:'Close',
+    crit_title:'Critical disguise',
+    admin_title:'Admin', admin_sub:'Platform management dashboard',
+    tab_coupons:'Coupons', tab_shop:'Shop', tab_redeems:'Redemptions', tab_giveaway:'Giveaway', tab_points:'Points', tab_users:'Users',
+    brave_title:'You are using Brave Browser',
+    brave_msg:'To log in, temporarily disable Brave Shields on this site:<br>Click the lion icon 🦁 in the address bar → "Shields down" → reload the page.',
+    hidra_runs:'Runs', hidra_cofres:'Chests', hidra_yang:'Total Yang',
+    hidra_add:'Log run', hidra_clear:'Clear',
+    hidra_history:'History',
+  },
+  de: {
+    flag:'🇩🇪', code:'DE',
+    nav_home:'Start', nav_profile:'Profil', nav_shop:'Shop', nav_timers:'Timer', nav_disguises:'Verkleidungen', nav_giveaway:'Gewinnspiel', nav_admin:'Admin',
+    login_btn:'Mit Twitch anmelden', logout_btn:'Abmelden',
+    hero_badge:'Jetzt live · Streamer',
+    hero_sub:'Stream. Gaming. Adrenalin.<br>Dein nächstes großes Spiel beginnt hier.',
+    hero_watch:'Auf Twitch ansehen',
+    stream_label:'Livestream',
+    follow_us:'Folge uns',
+    offline_sub:'Gerade offline',
+    follow_twitch:'Auf Twitch folgen',
+    profile_title:'Profil', profile_sub:'Deine Punkte, Rang und Verlauf',
+    profile_login:'Melde dich an, um auf dein Profil zuzugreifen',
+    login_with_twitch:'Mit Twitch anmelden',
+    discord_title:'Discord-Benachrichtigungen',
+    discord_sub:'Verbinde deinen Discord-Account, um DMs zu erhalten, wenn deine Verkleidungen ablaufen.',
+    discord_connect:'Discord verbinden',
+    discord_test:'DM testen', discord_disconnect:'Trennen',
+    coupon_title:'Gutschein einlösen',
+    coupon_sub:'Hast du einen Code? Gib ihn unten ein, um Punkte zu erhalten.',
+    coupon_btn:'Einlösen', coupon_ph:'INUH-XXXX-XXXX',
+    pts_label:'Punkte', rank_label:'Neu',
+    leaderboard:'Bestenliste',
+    shop_title:'Shop', shop_sub:'Tausche deine Punkte gegen exklusive Belohnungen',
+    shop_login:'Melde dich an, um auf den Shop zuzugreifen',
+    shop_notice:'Nach dem Einlösen öffne ein Ticket auf Discord, um deine Belohnung zu erhalten.',
+    your_points:'Deine Punkte:',
+    out_of_stock:'Ausverkauft', stock_label:'Bestand:',
+    redeem_btn:'Einlösen', no_pts:'Keine Pkt.',
+    confirm_redeem:'Einlösung bestätigen',
+    confirm_btn:'Bestätigen', cancel_btn:'Abbrechen',
+    discord_notice:'Nach der Bestätigung öffne ein Ticket auf Discord.',
+    timers_title:'Timer', timers_sub:'Respawn-Timer und Run-Tracker',
+    new_timer:'Neuer Timer', tab_timers:'Timer', tab_hidra:'Hidra Tracker',
+    timer_info:'Timer laufen weiter, auch wenn die Seite geschlossen ist.',
+    disguises_title:'Verkleidungen', disguises_sub:'Verfolge die Dauer deiner Spielverkleidungen',
+    disguises_login:'Melde dich an, um den Tracker zu verwenden',
+    add_disguise:'Verkleidung hinzufügen',
+    dg_type_traje:'Outfit', dg_type_arma:'Waffe', dg_type_penteado:'Frisur', dg_type_outro:'Andere',
+    dg_name_ph:'z.B.: Schattenkrieger',
+    dg_add_btn:'Hinzufügen',
+    renew_btn:'Erneuern', edit_time_btn:'Zeit bearbeiten',
+    safe:'Sicher', warn_status:'Warnung', crit_status:'Kritisch', exp_status:'Abgelaufen',
+    giveaway_title:'Gewinnspiel', giveaway_sub:'Nimm an Community-Gewinnspielen teil',
+    no_giveaway:'Kein aktives Gewinnspiel', no_giveaway_sub:'Bleib beim Stream, um zukünftige Gewinnspiele nicht zu verpassen.',
+    giveaway_active:'Aktives Gewinnspiel',
+    participate_btn:'Teilnehmen', tickets_label:'Tickets',
+    cost_label:'Kosten:', you_have:'Du hast',
+    joined_label:'Angemeldet', your_tickets:'Deine Tickets:',
+    winner_label:'🏆 Gewinnspiel-Gewinner',
+    gw_history:'Gewinnspiel-Verlauf', no_history:'Noch kein Verlauf.',
+    stop_disguise:'Verkleidung stoppen', close_btn:'Schließen',
+    crit_title:'Kritische Verkleidung',
+    admin_title:'Admin', admin_sub:'Plattform-Verwaltungsdashboard',
+    tab_coupons:'Gutscheine', tab_shop:'Shop', tab_redeems:'Einlösungen', tab_giveaway:'Gewinnspiel', tab_points:'Punkte', tab_users:'Benutzer',
+    brave_title:'Du verwendest den Brave-Browser',
+    brave_msg:'Um dich anzumelden, deaktiviere vorübergehend die Brave Shields auf dieser Seite:<br>Klicke auf das Löwensymbol 🦁 in der Adressleiste → "Shields deaktiviert" → Seite neu laden.',
+    hidra_runs:'Runs', hidra_cofres:'Truhen', hidra_yang:'Yang gesamt',
+    hidra_add:'Run erfassen', hidra_clear:'Leeren',
+    hidra_history:'Verlauf',
+  },
+  tr: {
+    flag:'🇹🇷', code:'TR',
+    nav_home:'Ana Sayfa', nav_profile:'Profil', nav_shop:'Mağaza', nav_timers:'Zamanlayıcılar', nav_disguises:'Kılıklar', nav_giveaway:'Çekiliş', nav_admin:'Yönetici',
+    login_btn:"Twitch ile Giriş Yap", logout_btn:'Çıkış',
+    hero_badge:'Şu an canlı · Yayıncı',
+    hero_sub:'Yayın. Oyun. Adrenalin.<br>Bir sonraki büyük hamlen burada başlıyor.',
+    hero_watch:"Twitch'te İzle",
+    stream_label:'Canlı Yayın',
+    follow_us:'Bizi Takip Et',
+    offline_sub:'Şu an çevrimdışı',
+    follow_twitch:"Twitch'te Takip Et",
+    profile_title:'Profil', profile_sub:'Puanların, sıralaман ve geçmişin',
+    profile_login:'Profile erişmek için giriş yap',
+    login_with_twitch:"Twitch ile Giriş Yap",
+    discord_title:'Discord Bildirimleri',
+    discord_sub:'Kılıkların sona ermek üzere olduğunda DM almak için Discord hesabını bağla.',
+    discord_connect:'Discord Hesabını Bağla',
+    discord_test:'DM Test Et', discord_disconnect:'Bağlantıyı Kes',
+    coupon_title:'Kupon Kullan',
+    coupon_sub:'Kodun var mı? Puanlarını almak için aşağıya gir.',
+    coupon_btn:'Kullan', coupon_ph:'INUH-XXXX-XXXX',
+    pts_label:'puan', rank_label:'Yeni',
+    leaderboard:'Lider Tablosu',
+    shop_title:'Mağaza', shop_sub:'Puanlarını özel ödüllerle değiştir',
+    shop_login:'Mağazaya erişmek için giriş yap',
+    shop_notice:"Kullandıktan sonra ödülünü almak için Discord'da bir bilet aç.",
+    your_points:'Puanların:',
+    out_of_stock:'Stok Yok', stock_label:'Stok:',
+    redeem_btn:'Kullan', no_pts:'Puan Yok',
+    confirm_redeem:'Kullanımı Onayla',
+    confirm_btn:'Onayla', cancel_btn:'İptal',
+    discord_notice:"Onayladıktan sonra Discord'da bir bilet aç.",
+    timers_title:'Zamanlayıcılar', timers_sub:'Yeniden doğma zamanlayıcıları ve run takibi',
+    new_timer:'Yeni Zamanlayıcı', tab_timers:'Zamanlayıcılar', tab_hidra:'Hidra Takibi',
+    timer_info:'Sayfa kapalı olsa bile zamanlayıcılar çalışmaya devam eder.',
+    disguises_title:'Kılıklar', disguises_sub:'Oyun içi kılık süreni takip et',
+    disguises_login:'Takipçiyi kullanmak için giriş yap',
+    add_disguise:'Kılık Ekle',
+    dg_type_traje:'Kıyafet', dg_type_arma:'Silah', dg_type_penteado:'Saç Stili', dg_type_outro:'Diğer',
+    dg_name_ph:'Örn: Gölge Savaşçısı',
+    dg_add_btn:'Ekle',
+    renew_btn:'Yenile', edit_time_btn:'Süreyi Düzenle',
+    safe:'Güvende', warn_status:'Dikkat', crit_status:'Kritik', exp_status:'Süresi Doldu',
+    giveaway_title:'Çekiliş', giveaway_sub:'Topluluk çekilişlerine katıl',
+    no_giveaway:'Aktif çekiliş yok', no_giveaway_sub:'Yaklaşan çekilişler için yayını takip et.',
+    giveaway_active:'Aktif Çekiliş',
+    participate_btn:'Katıl', tickets_label:'bilet',
+    cost_label:'Maliyet:', you_have:'Sahipsin',
+    joined_label:'Katıldın', your_tickets:'Biletlerin:',
+    winner_label:'🏆 Çekiliş Kazananı',
+    gw_history:'Çekiliş Geçmişi', no_history:'Henüz geçmiş yok.',
+    stop_disguise:'Kılığı Durdur', close_btn:'Kapat',
+    crit_title:'Kritik Kılık',
+    admin_title:'Yönetici', admin_sub:'Platform yönetim paneli',
+    tab_coupons:'Kuponlar', tab_shop:'Mağaza', tab_redeems:'Kullanımlar', tab_giveaway:'Çekiliş', tab_points:'Puanlar', tab_users:'Kullanıcılar',
+    brave_title:'Brave Tarayıcısı Kullanıyorsunuz',
+    brave_msg:"Giriş yapmak için bu sitede Brave Kalkanlarını geçici olarak devre dışı bırakın:<br>Adres çubuğundaki aslan simgesine 🦁 tıklayın → 'Kalkanlar devre dışı' → sayfayı yenileyin.",
+    hidra_runs:'Runlar', hidra_cofres:'Sandıklar', hidra_yang:'Toplam Yang',
+    hidra_add:'Run Kaydet', hidra_clear:'Temizle',
+    hidra_history:'Geçmiş',
+  }
+};
+
+let currentLang = localStorage.getItem('inuhzao_lang') || 'pt';
+
+function t(key){ return LANGS[currentLang]?.[key] || LANGS['pt']?.[key] || key; }
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('inuhzao_lang', lang);
+  applyLang();
+  // Close menu
+  document.getElementById('lang-menu').style.display='none';
+}
+
+function toggleLangMenu(){
+  const m = document.getElementById('lang-menu');
+  m.style.display = m.style.display==='none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', function(e){
+  const sel = document.getElementById('lang-selector');
+  if(sel && !sel.contains(e.target)) document.getElementById('lang-menu').style.display='none';
+});
+
+function applyLang(){
+  const lang = LANGS[currentLang] || LANGS['pt'];
+  // Update flag + code
+  const flagEl = document.getElementById('lang-flag');
+  const codeEl = document.getElementById('lang-code');
+  if(flagEl) flagEl.textContent = lang.flag;
+  if(codeEl) codeEl.textContent = lang.code;
+  // Mark active
+  document.querySelectorAll('.lang-opt').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang===currentLang);
+  });
+  // Nav links
+  const navLinks = document.querySelectorAll('.nl');
+  const navKeys = ['nav_home','nav_profile','nav_shop','nav_timers','nav_disguises','nav_giveaway','nav_admin'];
+  navLinks.forEach((el,i)=>{ if(navKeys[i]) el.textContent=t(navKeys[i]); });
+  // Data attributes - update all elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.dataset.i18n;
+    if(el.tagName==='INPUT' && el.placeholder !== undefined) el.placeholder = t(key);
+    else if(el.tagName==='INPUT' || el.tagName==='BUTTON') el.textContent = t(key);
+    else el.innerHTML = t(key);
+  });
+  // Re-render dynamic content if on active page
+  const activePage = sessionStorage.getItem('currentPage') || 'home';
+  if(activePage==='perfil' && currentUser) loadPerfil();
+  if(activePage==='loja' && currentUser) loadLoja();
+}
+
+function initLang(){
+  currentLang = localStorage.getItem('inuhzao_lang') || 'pt';
+  applyLang();
+}
+
 // ── INIT ──
 // Pedir permissão de notificações
 if('Notification' in window && Notification.permission==='default'){
@@ -2250,6 +2568,7 @@ initAuth().then(() => {
 });
 checkLive();
 initTheme();
+initLang();
 </script>
 </body>
 </html>
