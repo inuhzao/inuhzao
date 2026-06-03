@@ -3,15 +3,13 @@ const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const session = require('express-session')
+const SupabaseSessionStore = require('./session-store')
 const { generalLimiter, authLimiter } = require('./middleware/rateLimit')
 
 const app = express()
 
 // ── SECURITY HEADERS ───────────────────────────────
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
-}))
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }))
 
 // ── CORS ───────────────────────────────────────────
 const allowedOrigins = [
@@ -33,25 +31,22 @@ app.use(cors({
 }))
 
 app.options('*', cors())
-
-// ── RATE LIMITING ──────────────────────────────────
 app.use(generalLimiter)
-
-// ── BODY PARSING ───────────────────────────────────
-app.use(express.json({ limit: '2mb' })) // reduzido de 5mb
+app.use(express.json({ limit: '2mb' }))
 app.use(express.urlencoded({ extended: true, limit: '2mb' }))
 
-// ── SESSÃO ─────────────────────────────────────────
+// ── SESSÃO (Supabase REST — persiste entre deploys) ─
 app.set('trust proxy', 1)
 
 app.use(session({
+  store: new SupabaseSessionStore(),
   secret: process.env.SESSION_SECRET || 'inuhzao_secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: true,
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
     sameSite: 'none'
   }
 }))
@@ -62,7 +57,6 @@ const { startScheduler } = require('./scheduler')
 startScheduler()
 
 // ── ROUTES ─────────────────────────────────────────
-const { authLimiter: aLim } = require('./middleware/rateLimit')
 app.use('/auth',     authLimiter, require('./routes/auth'))
 app.use('/points',   require('./routes/points'))
 app.use('/shop',     require('./routes/shop'))
@@ -77,16 +71,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', env: process.env.NODE_ENV, time: new Date().toISOString() })
 })
 
-// ── 404 ────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada.' }))
 
-// ── ERROR HANDLER ──────────────────────────────────
 app.use((err, req, res, next) => {
-  // Não expor detalhes de erro em produção
   console.error(err.message)
-  if (err.message?.includes('CORS')) {
-    return res.status(403).json({ error: 'Acesso negado.' })
-  }
+  if (err.message?.includes('CORS')) return res.status(403).json({ error: 'Acesso negado.' })
   res.status(500).json({ error: 'Erro interno.' })
 })
 
