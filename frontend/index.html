@@ -517,7 +517,7 @@ select.fi option{background:var(--s2)}
         </div>
         <div class="pts-big">
           <div class="pts-big-v" id="prf-pts">0</div>
-          <div class="pts-big-l">pontos</div>
+          <div class="pts-big-l" data-i18n="pts_suffix">pontos</div>
         </div>
       </div>
       <div class="stats-g">
@@ -1009,7 +1009,7 @@ function parseYang(val){
 }
 function fmtT(s){if(s<=0)return'00:00:00';const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;}
 function fmtDur(s){if(s>=86400)return Math.round(s/86400)+'d';if(s>=3600)return Math.round(s/3600)+'h';return Math.round(s/60)+'m';}
-function getRank(p){if(p>=10000)return'Lenda';if(p>=5000)return'Diamond';if(p>=2000)return'Gold';if(p>=500)return'Silver';return'Novo';}
+function getRank(p){if(p>=10000)return t('rank_legend');if(p>=5000)return t('rank_diamond');if(p>=2000)return t('rank_gold');if(p>=500)return t('rank_silver');return t('rank_novo');}
 function getRem(t){return Math.max(0,t.total_secs-Math.floor((Date.now()-new Date(t.started_at).getTime())/1000));}
 function getZone(rem,tot){if(rem<=0)return'exp';if(rem<=3600)return'crit';if(rem<=tot*.25)return'warn';return'ok';}
 
@@ -1124,13 +1124,13 @@ function updateNav(){
     return;
   }
   const av=currentUser.avatar_url?`<img src="${currentUser.avatar_url}" alt="av">`:`<span style="font-size:11px;font-weight:700">${currentUser.username.substring(0,2).toUpperCase()}</span>`;
-  nr.innerHTML=`<div class="pts-tag" id="nav-pts">— pts</div><div class="nav-av" onclick="goPage('perfil',document.querySelector('.nl:nth-child(2)') )" title="${currentUser.username}">${av}</div><button onclick="doLogout()" style="all:unset;font-size:11px;color:var(--muted);cursor:pointer;padding:0 8px">Sair</button>`;
+  nr.innerHTML=`<div class="pts-tag" id="nav-pts">— pts</div><div class="nav-av" onclick="goPage('perfil',document.querySelector('.nl:nth-child(2)') )" title="${currentUser.username}">${av}</div><button onclick="doLogout()" style="all:unset;font-size:11px;color:var(--muted);cursor:pointer;padding:0 8px">${t('logout_btn')}</button>`;
   if(currentUser.is_admin)document.querySelectorAll('.admin-only').forEach(e=>e.style.display='flex');
   loadNavPoints();
 }
 
 async function loadNavPoints(){
-  try{const d=await req('GET','/points/me');const el=document.getElementById('nav-pts');if(el)el.textContent=`${d.points.toLocaleString()} pts`;}catch(e){}
+  try{const d=await req('GET','/points/me');const el=document.getElementById('nav-pts');if(el)el.textContent=`${d.points.toLocaleString()} ${t('pts_suffix')}`;}catch(e){}
 }
 
 async function doLogout(){
@@ -1269,7 +1269,7 @@ async function loadTimers(){
 }
 function renderTimers(){
   const g=document.getElementById('timer-grid');
-  if(!timers.length){g.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px;grid-column:1/-1">Sem timers. Clica em "Novo timer".</div>';return;}
+  if(!timers.length){g.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px;grid-column:1/-1">${t('no_timers')}</div>`;return;}
   g.innerHTML=timers.map(t=>{
     const rem=t.running?getRem(t):t.total_secs;const fin=rem<=0;
     const colorIdx = timerColors[t.id] ?? 0;
@@ -1277,7 +1277,7 @@ function renderTimers(){
     const cardBg = tc.bg;
     const cardBorder = tc.border;
     const textColor = fin ? 'var(--green)' : tc.text;
-    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}" style="background:${cardBg};border-color:${cardBorder}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}" style="color:${textColor}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} total</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" style="background:${cardBg};border-color:${cardBorder};color:${tc.text}" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc" onclick="showTimerModal('${t.id}')" aria-label="editar" title="Editar timer"><i class="ti ti-pencil"></i></button><button class="tc" onclick="showTimerColorPicker('${t.id}',this)" aria-label="cor" title="Mudar cor"><i class="ti ti-palette"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
+    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}" style="background:${cardBg};border-color:${cardBorder}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}" style="color:${textColor}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} ${window.t('dg_total_suffix')}</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" style="background:${cardBg};border-color:${cardBorder};color:${tc.text}" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc" onclick="showTimerModal('${t.id}')" aria-label="editar" title="Editar timer"><i class="ti ti-pencil"></i></button><button class="tc" onclick="showTimerColorPicker('${t.id}',this)" aria-label="cor" title="Mudar cor"><i class="ti ti-palette"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
   }).join('');
   timers.forEach(t=>{if(t.running)startTimerInterval(t.id);});
 }
@@ -1547,7 +1547,7 @@ function renderDisguises(){
         <div style="flex:1;min-width:0">
           <div class="dg-status ${zone}" style="margin-bottom:3px">${labels[zone]||zone}</div>
           <div class="dg-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.name}</div>
-          <div class="dg-dur">${fmtDur(d.total_secs)} total</div>
+          <div class="dg-dur">${fmtDur(d.total_secs)} ${t('dg_total_suffix')}</div>
         </div>
       </div>
       <div class="dg-time ${zone}" id="dt-${d.id}">${fmtT(rem)}</div>
@@ -2338,6 +2338,17 @@ const LANGS = {
     lboard_title:'Leaderboard',
     prf_role_admin:'Administrador',
     prf_role_viewer:'Viewer',
+    rank_novo:'Novo',
+    rank_silver:'Silver',
+    rank_gold:'Gold',
+    rank_diamond:'Diamond',
+    rank_legend:'Lenda',
+    pts_suffix:'pontos',
+    logout_btn:'Sair',
+    no_timers:'Sem timers. Clica em "Novo timer".',
+    dg_total_suffix:'total',
+    dg_popup_sub:'O teu disfarce está quase a expirar. Renova agora.',
+    dg_popup_label:'Disfarce crítico',
     hidra_section:'Registar run',
     hidra_col_cofres:'Cofres', hidra_col_yang:'Yang/Cofre', hidra_col_total:'Total', hidra_col_notes:'Notas', hidra_col_date:'Data',
     hidra_notes_ph:'Opcional', hidra_empty:'Sem runs ainda.',
