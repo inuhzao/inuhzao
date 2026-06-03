@@ -433,7 +433,7 @@ select.fi option{background:var(--s2)}
         <!-- Estado: não ligado -->
         <div id="discord-not-connected">
           <a class="btn-purple" style="background:#5865f2;display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:38px;border-radius:7px;text-decoration:none;font-size:13px;font-weight:600;color:#fff" href="https://inuhzao-production.up.railway.app/discord/connect">
-            <i class="ti ti-brand-discord" style="font-size:15px"></i>Ligar conta Discord
+            <i class="ti ti-brand-discord" style="font-size:15px"></i><span data-i18n="discord_connect">Ligar conta Discord</span>
           </a>
         </div>
 
@@ -450,9 +450,9 @@ select.fi option{background:var(--s2)}
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
             <button onclick="testDiscordDM()" style="all:unset;box-sizing:border-box;font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.2);color:#a5b4fc;cursor:pointer">
-              <i class="ti ti-send" style="font-size:12px;vertical-align:-1px"></i> Testar DM
+              <i class="ti ti-send" style="font-size:12px;vertical-align:-1px"></i> <span data-i18n="discord_test">Testar DM</span>
             </button>
-            <button onclick="disconnectDiscord()" style="all:unset;box-sizing:border-box;font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:var(--red);cursor:pointer">
+            <button onclick="disconnectDiscord()" style="all:unset;box-sizing:border-box;font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:var(--red);cursor:pointer" data-i18n="discord_disconnect">
               Desligar
             </button>
           </div>
@@ -521,12 +521,12 @@ select.fi option{background:var(--s2)}
         </div>
       </div>
       <div class="stats-g">
-        <div class="stat-b"><div class="stat-l">Posição</div><div class="stat-v blue" id="prf-pos">#—</div></div>
-        <div class="stat-b"><div class="stat-l">Total histórico</div><div class="stat-v orange" id="prf-total">0</div></div>
-        <div class="stat-b"><div class="stat-l">Gastos na loja</div><div class="stat-v" id="prf-spent">0</div></div>
+        <div class="stat-b"><div class="stat-l" data-i18n="stat_position">Posição</div><div class="stat-v blue" id="prf-pos">#—</div></div>
+        <div class="stat-b"><div class="stat-l" data-i18n="stat_total">Total histórico</div><div class="stat-v orange" id="prf-total">0</div></div>
+        <div class="stat-b"><div class="stat-l" data-i18n="stat_spent">Gastos na loja</div><div class="stat-v" id="prf-spent">0</div></div>
       </div>
       <div class="lb-card">
-        <div class="lb-hdr">Leaderboard</div>
+        <div class="lb-hdr" data-i18n="lboard_title">Leaderboard</div>
         <div id="lb-list"></div>
       </div>
     </div>
@@ -622,7 +622,7 @@ select.fi option{background:var(--s2)}
         <div class="form-row" style="align-items:flex-start">
           <!-- Tipo + imagem -->
           <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-            <label class="fl">Tipo</label>
+            <label class="fl" data-i18n="dg_type_label">Tipo</label>
             <select class="fi" id="dg-type" onchange="updateDgTypeImg()" style="min-width:110px">
               <option value="traje" data-i18n="dg_type_traje">Traje</option>
               <option value="arma" data-i18n="dg_type_arma">Arma</option>
@@ -635,10 +635,10 @@ select.fi option{background:var(--s2)}
             </div>
             <input type="file" id="dg-custom-img" accept="image/*" style="display:none" onchange="setDgCustomImg(this)">
           </div>
-          <div class="fg"><label class="fl">Nome</label><input class="fi" type="text" id="dg-n" placeholder="Ex: Guerreiro das Sombras" data-i18n-ph="dg_name_ph"></div>
-          <div class="fg" style="max-width:65px"><label class="fl">Dias</label><input class="fi" type="number" id="dg-dd" value="0" min="0" placeholder="0"></div>
-          <div class="fg" style="max-width:65px"><label class="fl">Horas</label><input class="fi" type="number" id="dg-hh" value="1" min="0" max="23" placeholder="1"></div>
-          <div class="fg" style="max-width:65px"><label class="fl">Minutos</label><input class="fi" type="number" id="dg-mm" value="0" min="0" max="59" placeholder="0"></div>
+          <div class="fg"><label class="fl" data-i18n="dg_name_label">Nome</label><input class="fi" type="text" id="dg-n" placeholder="Ex: Guerreiro das Sombras" data-i18n-ph="dg_name_ph"></div>
+          <div class="fg" style="max-width:65px"><label class="fl" data-i18n="dg_days">Dias</label><input class="fi" type="number" id="dg-dd" value="0" min="0" placeholder="0"></div>
+          <div class="fg" style="max-width:65px"><label class="fl" data-i18n="dg_hours">Horas</label><input class="fi" type="number" id="dg-hh" value="1" min="0" max="23" placeholder="1"></div>
+          <div class="fg" style="max-width:65px"><label class="fl" data-i18n="dg_mins">Minutos</label><input class="fi" type="number" id="dg-mm" value="0" min="0" max="59" placeholder="0"></div>
           <button class="btn-teal" onclick="addDisguise()" style="align-self:flex-end" data-i18n="dg_add_btn">Adicionar</button>
         </div>
       </div>
@@ -882,17 +882,17 @@ select.fi option{background:var(--s2)}
 <!-- TIMER MODAL -->
 <div class="modal-ov" id="timer-modal" onclick="if(event.target===this)closeTimerModal()">
   <div class="modal">
-    <h2 id="tm-modal-title">Novo timer</h2>
+    <h2 id="tm-modal-title" data-i18n="timer_new_title">Novo timer</h2>
     <div class="form-grid">
-      <div class="fg" style="grid-column:1/-1"><label class="fl">Nome</label><input class="fi" type="text" id="tm-n" placeholder="Ex: Hidra, Boss..."></div>
-      <div class="fg"><label class="fl">Dias</label><input class="fi" type="number" id="tm-d" value="0" min="0"></div>
-      <div class="fg"><label class="fl">Horas</label><input class="fi" type="number" id="tm-h" value="0" min="0" max="23"></div>
-      <div class="fg"><label class="fl">Minutos</label><input class="fi" type="number" id="tm-m" value="20" min="0" max="59"></div>
-      <div class="fg"><label class="fl">Segundos</label><input class="fi" type="number" id="tm-s" value="0" min="0" max="59"></div>
+      <div class="fg" style="grid-column:1/-1"><label class="fl" data-i18n="timer_name">Nome</label><input class="fi" type="text" id="tm-n" placeholder="Ex: Hidra, Boss..."></div>
+      <div class="fg"><label class="fl" data-i18n="timer_days">Dias</label><input class="fi" type="number" id="tm-d" value="0" min="0"></div>
+      <div class="fg"><label class="fl" data-i18n="timer_hours">Horas</label><input class="fi" type="number" id="tm-h" value="0" min="0" max="23"></div>
+      <div class="fg"><label class="fl" data-i18n="timer_mins">Minutos</label><input class="fi" type="number" id="tm-m" value="20" min="0" max="59"></div>
+      <div class="fg"><label class="fl" data-i18n="timer_secs">Segundos</label><input class="fi" type="number" id="tm-s" value="0" min="0" max="59"></div>
     </div>
     <div class="modal-footer">
-      <button onclick="closeTimerModal()" style="all:unset;box-sizing:border-box;font-size:12px;font-weight:500;padding:9px 20px;border-radius:6px;background:var(--s2);color:var(--muted);cursor:pointer">Cancelar</button>
-      <button class="btn-action" id="tm-submit-btn" onclick="submitTimerModal()">Criar timer</button>
+      <button onclick="closeTimerModal()" style="all:unset;box-sizing:border-box;font-size:12px;font-weight:500;padding:9px 20px;border-radius:6px;background:var(--s2);color:var(--muted);cursor:pointer" data-i18n="cancel_btn">Cancelar</button>
+      <button class="btn-action" id="tm-submit-btn" onclick="submitTimerModal()" data-i18n="timer_create_btn">Criar timer</button>
     </div>
   </div>
 </div>
@@ -1151,7 +1151,7 @@ async function loadPerfil(){
   if(!currentUser){out.style.display='';inn.style.display='none';return;}
   out.style.display='none';inn.style.display='block';
   document.getElementById('prf-name').textContent=currentUser.display_name||currentUser.username;
-  document.getElementById('prf-role').textContent=currentUser.is_admin?'Administrador':'Viewer';
+  document.getElementById('prf-role').textContent=currentUser.is_admin?t('prf_role_admin'):t('prf_role_viewer');
   if(currentUser.avatar_url){document.getElementById('prf-av-img').src=currentUser.avatar_url;}
   loadDiscordStatus();
   try{
@@ -1169,7 +1169,8 @@ function renderLeaderboard(lb,myRank){
     const pos=i===0?'g':i===1?'s':i===2?'b':'';
     const isMe=u.username===currentUser?.username;
     const av=u.avatar_url?`<img src="${u.avatar_url}">`:`<span style="font-size:9px;font-weight:700">${u.username.substring(0,2).toUpperCase()}</span>`;
-    return`<div class="lb-row ${isMe?'me':''}"><span class="lb-pos ${pos}">${i+1}</span><div class="lb-av">${av}</div><span class="lb-name">${u.username}${isMe?` <span style="font-size:9px;color:var(--accent)">(tu)</span>`:''}</span><span style="font-size:10px;color:var(--muted);margin-right:4px">${getRank(u.points||0)}</span><span class="lb-pts">${(u.points||0).toLocaleString()}</span></div>`;
+    const meLabel = currentLang==='pt'?'tu':currentLang==='en'?'you':currentLang==='de'?'du':'sen';
+    return`<div class="lb-row ${isMe?'me':''}"><span class="lb-pos ${pos}">${i+1}</span><div class="lb-av">${av}</div><span class="lb-name">${u.username}${isMe?` <span style="font-size:9px;color:var(--accent)">(${meLabel})</span>`:''}</span><span style="font-size:10px;color:var(--muted);margin-right:4px">${getRank(u.points||0)}</span><span class="lb-pts">${(u.points||0).toLocaleString()}</span></div>`;
   }).join('');
 }
 
@@ -1291,8 +1292,10 @@ function showTimerModal(timerId){
   if(timerId){
     const t = timers.find(t=>t.id===timerId);
     if(!t) return;
-    title.textContent = 'Editar timer';
-    btn.textContent = 'Guardar';
+    title.textContent = window.t('timer_edit_title');
+    title.removeAttribute('data-i18n');
+    btn.textContent = window.t('timer_save_btn');
+    btn.removeAttribute('data-i18n');
     document.getElementById('tm-n').value = t.name;
     const rem = t.running ? Math.max(0,getRem(t)) : t.total_secs;
     document.getElementById('tm-d').value = Math.floor(rem/86400);
@@ -1300,8 +1303,10 @@ function showTimerModal(timerId){
     document.getElementById('tm-m').value = Math.floor((rem%3600)/60);
     document.getElementById('tm-s').value = rem%60;
   } else {
-    title.textContent = 'Novo timer';
-    btn.textContent = 'Criar timer';
+    title.setAttribute('data-i18n','timer_new_title');
+    title.textContent = window.t('timer_new_title');
+    btn.setAttribute('data-i18n','timer_create_btn');
+    btn.textContent = window.t('timer_create_btn');
     document.getElementById('tm-n').value='';
     document.getElementById('tm-d').value='0';
     document.getElementById('tm-h').value='0';
@@ -2309,6 +2314,30 @@ const LANGS = {
     hidra_runs:'Runs', hidra_cofres:'Cofres', hidra_yang:'Yang total',
     hidra_add:'Registar run', hidra_clear:'Limpar',
     hidra_history:'Histórico',
+    timer_name:'Nome',
+    timer_days:'Dias',
+    timer_hours:'Horas',
+    timer_mins:'Minutos',
+    timer_secs:'Segundos',
+    timer_new_title:'Novo timer',
+    timer_edit_title:'Editar timer',
+    timer_create_btn:'Criar timer',
+    timer_save_btn:'Guardar',
+    dg_type_label:'Tipo',
+    dg_name_label:'Nome',
+    dg_days:'Dias',
+    dg_hours:'Horas',
+    dg_mins:'Minutos',
+    hidra_cofres_label:'Cofres',
+    hidra_yang_label:'Yang/cofre',
+    hidra_notes_label:'Notas',
+    stat_position:'Posição',
+    stat_total:'Total histórico',
+    stat_spent:'Gastos na loja',
+    stat_watchtime:'Watchtime',
+    lboard_title:'Leaderboard',
+    prf_role_admin:'Administrador',
+    prf_role_viewer:'Viewer',
     hidra_section:'Registar run',
     hidra_col_cofres:'Cofres', hidra_col_yang:'Yang/Cofre', hidra_col_total:'Total', hidra_col_notes:'Notas', hidra_col_date:'Data',
     hidra_notes_ph:'Opcional', hidra_empty:'Sem runs ainda.',
@@ -2381,6 +2410,30 @@ const LANGS = {
     hidra_runs:'Runs', hidra_cofres:'Chests', hidra_yang:'Total Yang',
     hidra_add:'Log run', hidra_clear:'Clear',
     hidra_history:'History',
+    timer_name:'Name',
+    timer_days:'Days',
+    timer_hours:'Hours',
+    timer_mins:'Minutes',
+    timer_secs:'Seconds',
+    timer_new_title:'New timer',
+    timer_edit_title:'Edit timer',
+    timer_create_btn:'Create timer',
+    timer_save_btn:'Save',
+    dg_type_label:'Type',
+    dg_name_label:'Name',
+    dg_days:'Days',
+    dg_hours:'Hours',
+    dg_mins:'Minutes',
+    hidra_cofres_label:'Chests',
+    hidra_yang_label:'Yang/Chest',
+    hidra_notes_label:'Notes',
+    stat_position:'Position',
+    stat_total:'Total history',
+    stat_spent:'Shop spending',
+    stat_watchtime:'Watchtime',
+    lboard_title:'Leaderboard',
+    prf_role_admin:'Administrator',
+    prf_role_viewer:'Viewer',
     hidra_section:'Log run',
     hidra_col_cofres:'Chests', hidra_col_yang:'Yang/Chest', hidra_col_total:'Total', hidra_col_notes:'Notes', hidra_col_date:'Date',
     hidra_notes_ph:'Optional', hidra_empty:'No runs yet.',
@@ -2453,6 +2506,30 @@ const LANGS = {
     hidra_runs:'Runs', hidra_cofres:'Truhen', hidra_yang:'Yang gesamt',
     hidra_add:'Run erfassen', hidra_clear:'Leeren',
     hidra_history:'Verlauf',
+    timer_name:'Name',
+    timer_days:'Tage',
+    timer_hours:'Stunden',
+    timer_mins:'Minuten',
+    timer_secs:'Sekunden',
+    timer_new_title:'Neuer Timer',
+    timer_edit_title:'Timer bearbeiten',
+    timer_create_btn:'Timer erstellen',
+    timer_save_btn:'Speichern',
+    dg_type_label:'Typ',
+    dg_name_label:'Name',
+    dg_days:'Tage',
+    dg_hours:'Stunden',
+    dg_mins:'Minuten',
+    hidra_cofres_label:'Truhen',
+    hidra_yang_label:'Yang/Truhe',
+    hidra_notes_label:'Notizen',
+    stat_position:'Position',
+    stat_total:'Gesamtverlauf',
+    stat_spent:'Shop-Ausgaben',
+    stat_watchtime:'Zuschauerzeit',
+    lboard_title:'Bestenliste',
+    prf_role_admin:'Administrator',
+    prf_role_viewer:'Zuschauer',
     hidra_section:'Run erfassen',
     hidra_col_cofres:'Truhen', hidra_col_yang:'Yang/Truhe', hidra_col_total:'Gesamt', hidra_col_notes:'Notizen', hidra_col_date:'Datum',
     hidra_notes_ph:'Optional', hidra_empty:'Noch keine Runs.',
@@ -2525,6 +2602,30 @@ const LANGS = {
     hidra_runs:'Runlar', hidra_cofres:'Sandıklar', hidra_yang:'Toplam Yang',
     hidra_add:'Run Kaydet', hidra_clear:'Temizle',
     hidra_history:'Geçmiş',
+    timer_name:'İsim',
+    timer_days:'Günler',
+    timer_hours:'Saatler',
+    timer_mins:'Dakikalar',
+    timer_secs:'Saniyeler',
+    timer_new_title:'Yeni zamanlayıcı',
+    timer_edit_title:'Zamanlayıcıyı düzenle',
+    timer_create_btn:'Zamanlayıcı oluştur',
+    timer_save_btn:'Kaydet',
+    dg_type_label:'Tür',
+    dg_name_label:'İsim',
+    dg_days:'Günler',
+    dg_hours:'Saatler',
+    dg_mins:'Dakikalar',
+    hidra_cofres_label:'Sandıklar',
+    hidra_yang_label:'Yang/Sandık',
+    hidra_notes_label:'Notlar',
+    stat_position:'Sıralama',
+    stat_total:'Toplam geçmiş',
+    stat_spent:'Mağaza harcaması',
+    stat_watchtime:'İzleme süresi',
+    lboard_title:'Lider Tablosu',
+    prf_role_admin:'Yönetici',
+    prf_role_viewer:'İzleyici',
     hidra_section:'Run Kaydet',
     hidra_col_cofres:'Sandıklar', hidra_col_yang:'Yang/Sandık', hidra_col_total:'Toplam', hidra_col_notes:'Notlar', hidra_col_date:'Tarih',
     hidra_notes_ph:'İsteğe bağlı', hidra_empty:'Henüz run yok.',
@@ -2542,6 +2643,7 @@ const LANGS = {
 let currentLang = localStorage.getItem('inuhzao_lang') || 'pt';
 
 function t(key){ return LANGS[currentLang]?.[key] || LANGS['pt']?.[key] || key; }
+window.t = t;
 
 function setLang(lang){
   currentLang = lang;
