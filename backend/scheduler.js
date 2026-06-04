@@ -10,8 +10,29 @@ const CHECKPOINTS = [
   { key: '1h',  secs: 3600,  zone: 'crit' },
 ]
 
-// Guarda quais notificações já foram enviadas: { disguiseId_key: true }
-const sentNotifications = new Map()
+// Persistência no Supabase: tabela disguise_notifications (disguise_id, checkpoint_key)
+// Sobrevive a deploys e restarts — ao contrário de um Map em memória
+async function wasNotified(disguiseId, key) {
+  try {
+    const { data } = await supabase
+      .from('disguise_notifications')
+      .select('id')
+      .eq('disguise_id', disguiseId)
+      .eq('checkpoint_key', key)
+      .maybeSingle()
+    return !!data
+  } catch { return false }
+}
+
+async function markNotified(disguiseId, key) {
+  try {
+    await supabase
+      .from('disguise_notifications')
+      .upsert({ disguise_id: disguiseId, checkpoint_key: key }, { onConflict: 'disguise_id,checkpoint_key' })
+  } catch (e) {
+    console.error('[Scheduler] Erro ao guardar notificação:', e.message)
+  }
+}
 
 async function checkDisguises() {
   try {
@@ -35,9 +56,9 @@ async function checkDisguises() {
 
       if (remSecs <= 0) {
         // Expirado
-        const key = `${d.id}_exp`
-        if (!sentNotifications.has(key)) {
-          sentNotifications.set(key, true)
+        const key = 'exp'
+        if (!(await wasNotified(d.id, key))) {
+          await markNotified(d.id, key)
           await notifyDisguise(d.users.discord_id, d.name, 0, 'exp')
           console.log(`[Discord] Notificou expirado: ${d.name} → ${d.users.username}`)
         }
@@ -46,12 +67,13 @@ async function checkDisguises() {
 
       // Verificar checkpoints
       for (const cp of CHECKPOINTS) {
-        const key = `${d.id}_${cp.key}`
         // Dentro de 60 segundos do checkpoint
-        if (remSecs <= cp.secs && remSecs > cp.secs - 60 && !sentNotifications.has(key)) {
-          sentNotifications.set(key, true)
-          await notifyDisguise(d.users.discord_id, d.name, remSecs, cp.zone)
-          console.log(`[Discord] Notificou ${cp.key}: ${d.name} → ${d.users.username}`)
+        if (remSecs <= cp.secs && remSecs > cp.secs - 60) {
+          if (!(await wasNotified(d.id, cp.key))) {
+            await markNotified(d.id, cp.key)
+            await notifyDisguise(d.users.discord_id, d.name, remSecs, cp.zone)
+            console.log(`[Discord] Notificou ${cp.key}: ${d.name} → ${d.users.username}`)
+          }
         }
       }
     }
