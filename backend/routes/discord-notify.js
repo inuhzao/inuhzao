@@ -7,9 +7,9 @@ const { discordLimiter } = require('../middleware/rateLimit')
 const { validateDiscordId } = require('../middleware/validate')
 const router = express.Router()
 
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1510972013416808518'
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
-const DISCORD_REDIRECT = process.env.DISCORD_REDIRECT_URI || 'https://inuhzao-production.up.railway.app/discord/callback'
+const DISCORD_CLIENT_ID = '1510972013416808518'
+const DISCORD_CLIENT_SECRET = '5aNTTez75CLf0HAdaEEB7DrbJxOyyZtV'
+const DISCORD_REDIRECT = 'https://inuhzao-production.up.railway.app/discord/callback'
 
 // ── GET /discord/connect ───────────────────────────
 // Inicia OAuth Discord
