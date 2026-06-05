@@ -3,6 +3,14 @@
   "outputDirectory": "dist",
   "framework": null,
   "rewrites": [
+    { "source": "/auth/:path*", "destination": "https://inuhzao-production.up.railway.app/auth/:path*" },
+    { "source": "/points/:path*", "destination": "https://inuhzao-production.up.railway.app/points/:path*" },
+    { "source": "/shop/:path*", "destination": "https://inuhzao-production.up.railway.app/shop/:path*" },
+    { "source": "/coupons/:path*", "destination": "https://inuhzao-production.up.railway.app/coupons/:path*" },
+    { "source": "/giveaway/:path*", "destination": "https://inuhzao-production.up.railway.app/giveaway/:path*" },
+    { "source": "/game/:path*", "destination": "https://inuhzao-production.up.railway.app/game/:path*" },
+    { "source": "/admin/:path*", "destination": "https://inuhzao-production.up.railway.app/admin/:path*" },
+    { "source": "/discord/:path*", "destination": "https://inuhzao-production.up.railway.app/discord/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
