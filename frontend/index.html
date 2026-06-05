@@ -436,7 +436,7 @@ select.fi option{background:var(--s2)}
 
         <!-- Estado: não ligado -->
         <div id="discord-not-connected">
-          <a class="btn-purple" style="background:#5865f2;display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:38px;border-radius:7px;text-decoration:none;font-size:13px;font-weight:600;color:#fff" href="https://inuhzao-production.up.railway.app/discord/connect">
+          <a class="btn-purple" style="background:#5865f2;display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:38px;border-radius:7px;text-decoration:none;font-size:13px;font-weight:600;color:#fff" href="/discord/connect">
             <i class="ti ti-brand-discord" style="font-size:15px"></i><span data-i18n="discord_connect">Ligar conta Discord</span>
           </a>
         </div>
@@ -974,7 +974,7 @@ select.fi option{background:var(--s2)}
 </div>
 
 <script>
-const API = 'https://inuhzao-production.up.railway.app';
+const API = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
 
 // ── STATE ──
 let currentUser = null;
