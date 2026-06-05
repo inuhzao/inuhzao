@@ -15,7 +15,9 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
-  'https://inuhzao-site.vercel.app'
+  'https://inuhzao-site.vercel.app',
+  'https://inuhzao.com',
+  'https://www.inuhzao.com'
 ].filter(Boolean)
 
 app.use(cors({
