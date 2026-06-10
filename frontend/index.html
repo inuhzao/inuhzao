@@ -1271,6 +1271,8 @@ async function confirmBuy(){
 }
 
 // ── TIMERS ──
+let autoRenew = {}; // { timerId: true/false }
+
 async function loadTimers(){
   try{timers=await req('GET','/game/timers');}catch(e){timers=[];}
   renderTimers();
@@ -1285,9 +1287,17 @@ function renderTimers(){
     const cardBg = tc.bg;
     const cardBorder = tc.border;
     const textColor = fin ? 'var(--green)' : tc.text;
-    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}" style="background:${cardBg};border-color:${cardBorder}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}" style="color:${textColor}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} ${window.t('dg_total_suffix')}</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" style="background:${cardBg};border-color:${cardBorder};color:${tc.text}" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc" onclick="showTimerModal('${t.id}')" aria-label="editar" title="Editar timer"><i class="ti ti-pencil"></i></button><button class="tc" onclick="showTimerColorPicker('${t.id}',this)" aria-label="cor" title="Mudar cor"><i class="ti ti-palette"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
+    const isAuto = !!autoRenew[t.id];
+    return`<div class="timer-card ${t.running?'running':''} ${fin?'done':''}" id="tc-${t.id}" style="background:${cardBg};border-color:${cardBorder}"><div class="t-name">${t.name}</div><div class="t-disp ${fin?'done':''}" id="td-${t.id}" style="color:${textColor}">${fmtT(rem)}</div><div class="t-total">${fmtT(t.total_secs)} ${window.t('dg_total_suffix')}</div><div class="t-ctrl"><button class="tc play" onclick="togTimer('${t.id}')" style="background:${cardBg};border-color:${cardBorder};color:${tc.text}" aria-label="play/pause"><i class="ti ti-${t.running?'player-pause':'player-play'}"></i></button><button class="tc" onclick="rstTimer('${t.id}')" aria-label="reset"><i class="ti ti-refresh"></i></button><button class="tc ${isAuto?'active':''}" onclick="togAutoRenew('${t.id}')" aria-label="auto-renovar" title="${isAuto?'Auto-renovar: ON':'Auto-renovar: OFF'}" style="${isAuto?'color:#34d399;border-color:#34d399;':''}" ><i class="ti ti-repeat"></i></button><button class="tc" onclick="showTimerModal('${t.id}')" aria-label="editar" title="Editar timer"><i class="ti ti-pencil"></i></button><button class="tc" onclick="showTimerColorPicker('${t.id}',this)" aria-label="cor" title="Mudar cor"><i class="ti ti-palette"></i></button><button class="tc" onclick="delTimer('${t.id}')" aria-label="apagar"><i class="ti ti-trash"></i></button></div></div>`;
   }).join('');
   timers.forEach(t=>{if(t.running)startTimerInterval(t.id);});
+}
+
+function togAutoRenew(id){
+  autoRenew[id] = !autoRenew[id];
+  const t = timers.find(t=>t.id===id);
+  toast(`Auto-renovar ${autoRenew[id]?'activado ♻️':'desactivado'} para "${t?.name}"`);
+  renderTimers();
 }
 
 let editingTimerId = null;
@@ -1369,10 +1379,24 @@ async function togTimer(id){
 
 function startTimerInterval(id){
   clearInterval(timerIntvs[id]);
-  timerIntvs[id]=setInterval(()=>{
+  timerIntvs[id]=setInterval(async()=>{
     const t=timers.find(t=>t.id===id);if(!t||!t.running){clearInterval(timerIntvs[id]);return;}
     const rem=getRem(t);const el=document.getElementById('td-'+id);if(el)el.textContent=fmtT(rem);
-    if(rem<=0){t.running=false;clearInterval(timerIntvs[id]);delete timerIntvs[id];toast(`Timer "${t.name}" terminou`);renderTimers();}
+    if(rem<=0){
+      clearInterval(timerIntvs[id]);delete timerIntvs[id];
+      timerFinished(t.name);
+      if(autoRenew[id]){
+        // Renovar automaticamente
+        t.started_at=new Date().toISOString();
+        t.running=true;
+        try{await req('PATCH',`/game/timers/${id}`,{running:true,started_at:t.started_at});}catch(e){}
+        startTimerInterval(id);
+        renderTimers();
+      } else {
+        t.running=false;
+        renderTimers();
+      }
+    }
   },1000);
 }
 
