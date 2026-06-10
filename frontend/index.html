@@ -1427,6 +1427,12 @@ function showSub(id,el){
 // ── HIDRA ──
 async function loadHidra(){
   try{hidraLog=await req('GET','/game/hidra');}catch(e){hidraLog=[];}
+  // Restaurar último valor de yang/cofre
+  const lastYang = localStorage.getItem('hidra_last_yang');
+  if(lastYang){
+    const el = document.getElementById('h-yang');
+    if(el && !el.value) el.value = lastYang;
+  }
   renderHidra();
 }
 function renderHidra(){
@@ -1468,7 +1474,10 @@ async function addHidra(){
   try{
     const r=await req('POST','/game/hidra',{cofres:c,yang_por_cofre:y,notas:n});
     hidraLog.unshift(r);
-    ['h-cof','h-yang','h-not'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('h-cof').value='';
+    document.getElementById('h-not').value='';
+    // Guardar yang/cofre para a próxima vez
+    localStorage.setItem('hidra_last_yang', yRaw);
     renderHidra();
     toast(`${c} cofres = ${fmtY(c*y)} Yang`);
   }catch(e){toast(e.message,'err');}
